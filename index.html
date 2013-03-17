@@ -1,0 +1,183 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Psiturk by NYUCCL</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1>Psiturk</h1>
+        <p>A web framework for building experiments on Mechanical Turk</p>
+
+        <p class="view"><a href="https://github.com/NYUCCL/psiTurk">View the Project on GitHub <small>NYUCCL/psiTurk</small></a></p>
+
+
+        <ul>
+          <li><a href="https://github.com/NYUCCL/psiTurk/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/NYUCCL/psiTurk/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/NYUCCL/psiTurk">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <h1>What is this?</h1>
+
+<p>PsiTurk is an open platform for conducting custom behvioral experiments on
+Amazon's Mechanical Turk. </p>
+
+<p>It is intended to provide most of the backend machinery necessary to run your
+experiment. It uses AMT's <em>External Question</em> HIT type, meaning that you can
+collect data using any website. As long as you can turn your experiment into a
+website, you can run it with PsiTurk!</p>
+
+<p>You can direct questions to our <a href="https://groups.google.com/d/forum/psiturk">Q&amp;A Google group</a>.</p>
+
+<h1>Dependencies</h1>
+
+<p>You will need to use a relatively recent version of <a href="http://python.org">Python
+2</a> with the following modules installed:</p>
+
+<ul>
+<li>
+<a href="http://flask.pocoo.org/">Flask</a> – A lightweight web framework.</li>
+<li>
+<a href="http://www.sqlalchemy.org/">SQLAlchemy</a> – A powerful SQL abstraction layer.</li>
+<li>
+<a href="https://github.com/boto/boto">Boto</a> – A library for interfacing with
+Amazon services, including MTurk.</li>
+</ul><p>You can install these with the following commands:</p>
+
+<pre><code>easy_install Flask-SQLAlchemy
+easy_install boto
+</code></pre>
+
+<p>To serve your experiment to participants online, you will need to run this code
+from a web server connected to the internet.</p>
+
+<h1>Quick Start</h1>
+
+<p>Just follow these directions to get started:</p>
+
+<ol>
+<li>Check out this repository in git, or download the whole thing using the
+'ZIP' button near the top of this page.</li>
+<li>Install the dependencies. </li>
+<li>Sign up for an AWS account, available <a href="http://aws.amazon.com/">here</a>.</li>
+<li>Sign up for a Mechanical Turk requester account, available
+<a href="https://requester.mturk.com/">here</a>.</li>
+<li>Rename the config file from <code>config.txt.example</code> to <code>config.txt</code>. Update it
+with your secret AWS code.</li>
+<li>
+<p>Making sure that the configuration file is set up to use the Amazon sandbox,
+issue the following commands from the PsiTurk root folder:</p>
+
+<pre><code>python mturk/createHIT.py    # To post a HIT to the sandbox
+python app.py                # To start the debugging server
+</code></pre>
+</li>
+<li><p>You should be ready to go! Point your browser to the <a href="https://workersandbox.mturk.com/mturk/findhits">worker
+sandbox</a> and try to find your
+HIT.</p></li>
+</ol><p><em>Note</em>: If you are just testing the server without posting your HIT to Amazon,
+you can see the experiment at the following link:
+http://localhost:5001/mturk?assignmentId=debug&amp;hitId=debug&amp;workerId=debug</p>
+
+<h1>Experiment design</h1>
+
+<p>We have provided an example stroop experiment that could form the basis of your
+own experiment. It is a Javascript experiment, with task logic inside the
+participant's browser using Javascript code in <code>static/task.js</code>. This
+Javascript code works by dynamically changing the html document served to
+participants in <code>templates/exp.html</code>. PsiTurk assigns a condition and
+counterbalance to each participant. These are fed into JavaScript by plugging
+them into <code>templates/exp.html</code>. PsiTurk actively manages the condition and
+counterbalance subjects are assigned to, helping you fill them in evenly. To
+tell PsiTurk how many conditions and counterbalance identities are possible in
+your experiment, adust <code>num_conds</code> and <code>num_counters</code> in <code>config.txt</code>.</p>
+
+<h1>Deployment</h1>
+
+<h2>Configuration</h2>
+
+<p>To make your experiment available on the internet, you will need to make the
+following changes to the configuration file:</p>
+
+<pre><code>host: 0.0.0.0
+question_url: http://yoururl:yourport/mturk
+</code></pre>
+
+<p>replacing <code>yoururl</code> with the url to your surver, and <code>yourport</code> with the port
+you have configured in <code>config.txt</code> (by default, 5001).</p>
+
+<h2>Server</h2>
+
+<p>We <strong>strongly</strong> recommend you not deploy your experiment using the debugging
+server (the one you start using <code>python app.py</code>). It is not robust to failures,
+which can leave your participants stranded without a way of submitting their
+completed HITs. Additionally, if you accidentally leave debug mode on, you will
+expose yourself to major security holes.</p>
+
+<p>An alternative we have set up is gunicorn. You can install gunicorn using the
+following command:</p>
+
+<pre><code>easy_install gunicorn
+</code></pre>
+
+<p>Then simply run using:</p>
+
+<pre><code>sh run_gunicorn.sh
+</code></pre>
+
+<p>You can configure gunicorn in <code>config.txt</code> under <code>Server Parameters</code>.</p>
+
+<p>Flask apps like PsiTurk can be deployed as a CGI, fastCGI, or WSGI app on any
+server system, so there are many alternative options for deployment.
+Additional options for deploying Flask can be found
+<a href="http://flask.pocoo.org/docs/deploying/">here</a>.</p>
+
+<h2>Database</h2>
+
+<p>We recommend using a deployment-robust database solution such as
+<a href="http://www.mysql.org">MySQL</a> or <a href="http://www.postgresql.org">PostgreSQL</a>.
+SQLite does not allow concurrent access to the database, so if the locks work
+properly, simultaneous access (say, from multiple users submitting their data
+at the same time) could destabilize your database. In the worst (unlikely)
+scenario, the database could become corrupted, resulting in data loss.</p>
+
+<p>Instructions for setting up a MySQL server on a Mac can be found 
+<a href="https://github.com/NYUCCL/psiTurk/wiki/Macintosh-Configuration">in the wiki</a>.
+Other platforms, check out instructions at
+<a href="http://dev.mysql.com/doc/refman/5.5/en//installing.html">mysql.org</a>.</p>
+
+<h1>Copyright</h1>
+
+<p>You are welcome to use this code for personal or academic uses. If you fork,
+please cite the authors (Todd Gureckis and John McDonnell).</p>
+      </section>
+      <footer>
+        <p>This project is maintained by <a href="https://github.com/NYUCCL">NYUCCL</a></p>
+        <p><small>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></small></p>
+      </footer>
+    </div>
+    <script src="javascripts/scale.fix.js"></script>
+              <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-39350892-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
