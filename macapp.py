@@ -14,7 +14,7 @@ class MyApp(AppKit.NSApplication):
 
     win = None
 
-    def makeWindow(self):
+    def makeWindow(self, dele):
         self.rect = Foundation.NSMakeRect(100,350,600,800)
         self.win = AppKit.NSWindow.alloc()
         self.win.initWithContentRect_styleMask_backing_defer_(self.rect, 
@@ -25,7 +25,7 @@ class MyApp(AppKit.NSApplication):
             AppKit.NSBackingStoreBuffered, 
             False)
         self.win.setTitle_("PsiTurk")
-        self.win.setDelegate_(self.deleg)
+        self.win.setDelegate_(dele)
         self.win.display()
         self.win.orderFrontRegardless()      
         self.webview = WebKit.WebView.alloc()
@@ -46,27 +46,26 @@ class MyApp(AppKit.NSApplication):
 
     def makeMenus(self):
         # Make statusbar item
-        self.mainMenu.removeAllItems_()
-        # mainmenu = AppKit.NSMenu.alloc().init()
-        # self.setMainMenu_(mainmenu)
-        # fileMenu = AppKit.NSMenu.alloc().initWithTitle_("File")
-        # newMenu = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Quit PsiTurk', "terminate:", 'q')
-        # fileMenu.addItem_(newMenu)
+        #self.setMainMenu_(None)
+        #removeAllItems_()
+        mainmenu = AppKit.NSMenu.alloc().init()
+        app.setMainMenu_(mainmenu)
 
-        # fileMenuItem = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_("File", None, '')
-        # fileMenuItem.setSubmenu_(fileMenu)
-        # mainmenu.addItem_(fileMenuItem)
-        # fileMenuItem.setEnabled_(True)
+        fileMenu = AppKit.NSMenu.alloc().initWithTitle_("File")
+        newMenu = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_('Quit PsiTurk', "terminate:", 'q')
+        fileMenu.addItem_(newMenu)
 
-    def applicationDidFinishLaunching(self, notification):
-        self.makeMenu()
-        self.bringToFront()
+        fileMenuItem = AppKit.NSMenuItem.alloc().initWithTitle_action_keyEquivalent_("File", None, '')
+        fileMenuItem.setSubmenu_(fileMenu)
+        mainmenu.addItem_(fileMenuItem)
+        fileMenuItem.setEnabled_(True)
 
-    def finishLaunching(self):
+    def setupApp(self):  # i did this because if you try doing in finshLoading() it'll load the .xib and overwrite the menu
         self.deleg = AppDelegate.alloc().init()
         self.deleg.setApp_(self)
-        self.makeWindow()
-        
+        self.makeMenus()
+        self.makeWindow(self.deleg)
+        self.bringToFront()        
 
     def clicked_(self, notification):
         AppKit.NSLog('clicked!')
@@ -74,6 +73,7 @@ class MyApp(AppKit.NSApplication):
 
 if __name__ == "__main__":
     app = MyApp.sharedApplication()
+    app.setupApp()
     app.run()
     #AppHelper.runEventLoop()
 
