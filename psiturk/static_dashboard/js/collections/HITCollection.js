@@ -38,6 +38,7 @@ define(["backbone", "models/HITModel"], function(Backbone, HITModel) {
         url: this.url,
         type: "GET",
         success: function(data) {
+          console.log(data);
           return _this.allModels = data.hits;
         }
       });

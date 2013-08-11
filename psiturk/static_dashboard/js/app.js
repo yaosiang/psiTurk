@@ -357,13 +357,13 @@ define(['jquery', 'underscore', 'backbone', 'router', 'models/ConfigModel', 'mod
             if (_this.config.get("HIT Configuration").using_sandbox === "True") {
               $('#sandbox-on').addClass('active');
               $('#sandbox-off').removeClass('active');
+              _this.loadHITTable();
             } else {
               $('#sandbox-on').removeClass('active');
               $('#sandbox-off').addClass('active');
+              _this.loadHITTable();
             }
-            _this.loadHITTable();
             _this.captureUIEvents();
-            _this.verifyAWSLogin();
             return _this.getExperimentStatus();
           });
         });
@@ -578,7 +578,8 @@ define(['jquery', 'underscore', 'backbone', 'router', 'models/ConfigModel', 'mod
       this.pubsub.bind("loadPayView", this.loadPayView);
       this.pubsub.bind("save", this.save);
       this.loadContent();
-      return this.monitorPsiturkServer();
+      this.monitorPsiturkServer();
+      return this.verifyAWSLogin();
     }
   };
 });

@@ -1,4 +1,4 @@
-#wy  Filename: app.coffee
+# Filename: app.coffee
 define [
       'jquery'
       'underscore'
@@ -329,12 +329,12 @@ define [
             if @config.get("HIT Configuration").using_sandbox is "True"
               $('#sandbox-on').addClass 'active'
               $('#sandbox-off').removeClass 'active'
+              @loadHITTable()
             else
               $('#sandbox-on').removeClass 'active'
               $('#sandbox-off').addClass 'active'
-            @loadHITTable()
+              @loadHITTable()
             @captureUIEvents()
-            @verifyAWSLogin()
             @getExperimentStatus()
         $.ajax
           url: '/is_internet_available'
@@ -531,3 +531,4 @@ define [
         # ================
         @loadContent()
         @monitorPsiturkServer()
+        @verifyAWSLogin()

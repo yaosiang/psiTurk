@@ -50,7 +50,7 @@ define(["backbone"], function(Backbone) {
           '#hit_lifetime', (function(x) {
             return x > 0;
           }), 'Must be positive'
-        ], ['#hit_lifetime', 'presence', 'Cannot be empty'], ['#hit_lifetime', 'presence', 'Cannot be empty'], ['#reward', 'presence', 'Cannot be empty'], [
+        ], ['#hit_lifetime', 'presence', 'Cannot be empty'], ['#reward', 'presence', 'Cannot be empty'], [
           '#reward', (function(x) {
             return x >= 0;
           }), 'Must be non-negative'

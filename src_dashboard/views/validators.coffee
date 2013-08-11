@@ -47,7 +47,6 @@ define [
               ['#max_assignments', ((x) -> x > 0), 'Must be non-negative']
               ['#hit_lifetime', ((x) -> x > 0) , 'Must be positive']
               ['#hit_lifetime', 'presence', 'Cannot be empty']
-              ['#hit_lifetime', 'presence', 'Cannot be empty']
               ['#reward', 'presence', 'Cannot be empty']
               ['#reward', ((x) -> x >= 0) , 'Must be non-negative']
               ['#duration', 'presence', 'Cannot be empty']

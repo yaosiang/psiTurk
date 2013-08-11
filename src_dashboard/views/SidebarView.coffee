@@ -88,8 +88,6 @@ define [
                     input:
                       database_url: @options.config.get("Database Parameters").database_url
                       table_name: @options.config.get("Database Parameters").table_name
-                #serverLog = =>
-                #  _.template ServerLogTemplate
                 serverParams = =>
                   _.template ServerParamsTemplate,
                     input:

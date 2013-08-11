@@ -14,6 +14,7 @@ require.config
     tab: "libs/bootstrap-tab"
     nod: "libs/nod"
     bacon: "libs/Bacon"
+    marionette : 'libs/backbone.marionette'
 
   # Shim sets the configuration for third party scripts that are not AMD compatible
   shim:
@@ -28,12 +29,16 @@ require.config
       exports: "Backbone" #attaches "Backbone" to the window object
     underscore:
       exports: "_"
+    marionette:
+      deps : ['jquery', 'underscore', 'backbone']
+      exports : 'Marionette'
 
 # end shim
 require [
   "jquery"
   "app"
   "bootstrap"
+  "marionette"
   "dropdown"
   "collapse"
   "tab"
@@ -44,6 +49,7 @@ require [
     $
     App
     Bootstrap
+    Marionette
     dropdown
     tab
   ) ->

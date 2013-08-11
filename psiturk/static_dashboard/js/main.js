@@ -11,7 +11,8 @@ require.config({
     collapse: "libs/bootstrap-collapse",
     tab: "libs/bootstrap-tab",
     nod: "libs/nod",
-    bacon: "libs/Bacon"
+    bacon: "libs/Bacon",
+    marionette: 'libs/backbone.marionette'
   },
   shim: {
     bootstrap: ["jquery"],
@@ -25,10 +26,14 @@ require.config({
     },
     underscore: {
       exports: "_"
+    },
+    marionette: {
+      deps: ['jquery', 'underscore', 'backbone'],
+      exports: 'Marionette'
     }
   }
 });
 
-require(["jquery", "app", "bootstrap", "dropdown", "collapse", "tab", "nod", "bacon"], function($, App, Bootstrap, dropdown, tab) {
+require(["jquery", "app", "bootstrap", "marionette", "dropdown", "collapse", "tab", "nod", "bacon"], function($, App, Bootstrap, Marionette, dropdown, tab) {
   return App.initialize();
 });
