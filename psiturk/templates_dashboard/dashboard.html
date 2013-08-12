@@ -2,18 +2,18 @@
 <html lang="en">
 <head>
     <title>psiTurk Dashboard</title>
-    <!-- Load the script "static/dashboard/js/main.js" as our entry point -->
-    <script data-main="static_dashboard/js/main" src="static_dashboard/js/libs/require.js"></script>
     <link href="static_dashboard/css/inspiritas.css" rel="stylesheet">
     <link href="static_dashboard/css/backbone.tableview.css" rel="stylesheet">
     <link rel="stylesheet" href="static_dashboard/css/font-awesome.css">
+    <!-- Place CSS overrides here -->
     <link href="static_dashboard/css/dashboard.css" rel="stylesheet">
 </head>
 <body>
 
 
 <!-- Navbar
-  ================================================== -->
+     ====== -->
+
 <div class="navbar navbar-static-top navbar-inverse">
   <div class="navbar-inner">
     <div class="container">
@@ -69,8 +69,10 @@
     </div>
 </div> <!-- /container -->
 
-<!-- Modals
-================================================== -->
+
+<!-- Modals (popups)
+     =============== -->
+
 <div id="server-off-modal" class="modal hide" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
@@ -192,7 +194,116 @@
 </div>
 
 <div id="run-expt-body">
-</div>
+</div> <!-- /Modals -->
+
+
+<!-- Templates
+     ========= -->
+
+<script type="text/template" id="overview-item">
+  <!-- Navbar
+       ====== -->
+  <section id="stats">
+    <header>
+      <span >
+        <div class="pull-right">
+          <button type="button" id="test" class="btn btn-primary btn-small" style="display: none;">Test</span>
+        </div>
+      </span>
+      <h1>Dashboard</h1>
+    </header>
+    <br>
+    <ul class="nav nav nav-tabs">
+      <li id="sandbox-on" class="sandbox-tabs"><a>Sandbox</a></li>
+      <li id="sandbox-off" class="sandbox-tabs"><a>Live</a></li>
+    </ul>
+    <div class="row-fluid">
+      <div class="span2">
+          <div class="kpi"><%= input.balance %></div>
+          <div><small>Available balance</small></div>
+      </div>
+      <div class="span2">
+          <div class="kpi">-</div>
+          <div><small>Pending review</small></div>
+      </div>
+      <div class="span2">
+          <div class="kpi">
+            <button type="button" id="run" class="btn btn-primary">Add HIT</span>
+          </div>
+          <div><small>Add a new HIT listing</small></div>
+      <div>
+    </div>
+  </section>
+
+  <hr style="background:#DDDDDD; border:0; height:1px" />
+
+  <!-- Table
+       ===== -->
+  <section>
+    <div class="" style="text-align:center; margin:20px 0 -50px 0">
+      <h4>Active HITs</h4>
+    </div>
+  </section>
+  <section id="tables">
+    </div>
+  </section>
+</script>
+
+<script type="text/template" id="sidebar-list-collection">
+  <!-- Sidebar
+       ======= -->
+  <aside>
+    <nav>
+      <ul class="nav">
+        <!-- Links dynamically placed here -->
+      </ul>
+    </nav>
+  </aside>
+</script>
+
+<script type="text/template" id="sidebar-item">
+  <a href="<%= url %>">
+    <i class='<%= icon %>'></i> <%= name %>
+  </a>
+</script> <!-- /Templates -->
+
+
+<!-- JavaScript
+     ========== -->
+
+<!-- Load js vendor libraries -->
+<script src="static_dashboard/js/libs/jquery.js"></script>
+<script src="static_dashboard/js/libs/underscore.js"></script>
+<script src="static_dashboard/js/libs/backbone.js"></script>
+<script src="static_dashboard/js/libs/backbone.marionette.js"></script>
+
+<!-- Load local resources -->
+<script src="static_dashboard/js/router.js"></script>
+<script src="static_dashboard/js/app.js"></script>
+<script src="static_dashboard/js/dashboard.js"></script>
+
+<!-- Load js entities -->
+<script src="static_dashboard/js/models/ConfigModel.js"></script>
+<script src="static_dashboard/js/models/AtAGlanceModel.js"></script>
+<script src="static_dashboard/js/models/HITModel.js"></script>
+<script src="static_dashboard/js/collections/HITCollection.js"></script>
+<script src="static_dashboard/js/collections/WorkerCollection.js"></script>
+
+<!-- Load js views -->
+<script src="static_dashboard/js/views/SidebarView.js"></script>
+<script src="static_dashboard/js/views/HITView.js"></script>
+<script src="static_dashboard/js/views/ContentView.js"></script>
+<script src="static_dashboard/js/views/RunExptView.js"></script>
+<script src="static_dashboard/js/views/PayAndBonusView.js"></script>
+
+<!-- Load js controllers -->
+<script src="static_dashboard/js/views/SidebarController.js"></script>
+
+<!-- Start dashboard app -->
+<script type="text/javascript">
+  DashboardManager.start();
+</script>
+
 
 </body>
 </html>
