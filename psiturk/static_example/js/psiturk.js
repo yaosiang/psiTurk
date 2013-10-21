@@ -37,7 +37,9 @@ var startTask = function () {
 	});
 };
 Backbone.Notifications.on('_psiturk_finishedinstructions', startTask);
-Backbone.Notifications.on('_psiturk_finishedtask', function(msg) { $(window).off("beforeunload"); });
+Backbone.Notifications.on('_psiturk_finishedtask', function(msg) { 
+	$(window).off("beforeunload"); 
+});
 
 $(window).blur( function() {
 	Backbone.Notifications.trigger('_psiturk_lostfocus');
