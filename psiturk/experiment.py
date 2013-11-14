@@ -210,15 +210,13 @@ def advertisement():
       These arguments will have appropriate values and we should enter the person
       in the database and provide a link to the experiment popup.
     """
-    if not SUPPORT_IE:
+    if (not SUPPORT_IE) and request.user_agent.browser == 'msie':
         # Handler for IE users if IE is not supported.
-        if request.user_agent.browser == 'msie':
-            return render_template( 'ie.html' )
+        return render_template( 'ie.html' )
     if not (request.args.has_key('hitId') and request.args.has_key('assignmentId')):
         raise ExperimentError('hit_assign_worker_id_not_set_in_mturk')
-    # Person has accepted the HIT, entering them into the database.
     hitId = request.args['hitId']
-    assignmentId = request.args['assignmentId']  #  Turn assignmentId into unique combination of assignment and worker Id 
+    assignmentId = request.args['assignmentId'] 
     already_in_db = False
     if request.args.has_key('workerId'):
         workerId = request.args['workerId']
