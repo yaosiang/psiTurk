@@ -5,19 +5,18 @@ Usage:
     psiturk_shell dashboard
 
 """
-
+import sys
+import re
 
 from cmd2 import Cmd
-import sys
 from docopt import docopt, DocoptExit
-import re
 import readline
-
 
 from amt_services import MTurkServices
 from version import version_number
 from psiturk_config import PsiturkConfig
 import experiment_server_controller as control
+import dashboard_server as dbs
 
 
 #Escape sequences for display
@@ -34,9 +33,8 @@ class color:
     UNDERLINE = '\033[4m'
     END = '\033[0m'
 
-#################################
-#decorator function borrowed from docopt
-#################################
+
+# decorator function borrowed from docopt
 def docopt_cmd(func):
     """
     This decorator is used to simplify the try/except block and pass the result
@@ -45,33 +43,24 @@ def docopt_cmd(func):
     def fn(self, arg):
         try:
             opt = docopt(fn.__doc__, arg)
-
         except DocoptExit as e:
             # The DocoptExit is thrown when the args do not match.
             # We print a message to the user and the usage block.
-
             print('Invalid Command!')
             print(e)
             return
-
         except SystemExit:
             # The SystemExit exception prints the usage for --help
             # We do not need to do the print here.
-
             return
-
         return func(self, opt)
-
     fn.__name__ = func.__name__
     fn.__doc__ = func.__doc__
     fn.__dict__.update(func.__dict__)
     return fn
 
-#################################
-# psiturk shell class
-#################################
-class psiTurk_Shell(Cmd):
 
+class psiTurk_Shell(Cmd):
 
     def __init__(self, config, server):
         Cmd.__init__(self)
@@ -80,12 +69,9 @@ class psiTurk_Shell(Cmd):
         self.live = 0
         self.sandbox = 0
         self.colorPrompt()
-        self.intro = color.GREEN + 'psiTurk version ' + version_number + '\nType "help" for more information.' + color.END
+        self.intro = color.GREEN + 'psiTurk version ' + version_number + \
+                     '\nType "help" for more information.' + color.END
 
-    
-    #################################
-    # colorPrompt
-    #################################
     def colorPrompt(self):
         prompt =  '[' + color.BOLD + 'psiTurk' + color.END
         serverSring = ''
@@ -100,16 +86,10 @@ class psiTurk_Shell(Cmd):
         prompt += ']$ '
         self.prompt =  prompt
     
-    #################################
-    # postcmd (runs after every command)
-    #################################
     def postcmd(self, stop, line):
         self.colorPrompt()
         return Cmd.postcmd(self, stop, line)
 
-    #################################
-    # dashboard
-    #################################    
     @docopt_cmd
     def do_dashboard(self, arg):
         """
@@ -118,32 +98,17 @@ class psiTurk_Shell(Cmd):
         -i <address>, --ip <address>    IP to run dashboard on. [default: localhost].
         -p <num>, --port <num>          Port to run dashboard on. [default: 22361].
         """
-
         arg['--port'] = int(arg['--port'])
-        import dashboard_server as dbs
         dbs.launch(ip=arg['--ip'], port=arg['--port'])
-
-
-    #################################
-    # version
-    #################################
 
     def do_version(self, arg):
         print 'psiTurk version ' + version_number
-
-    #################################
-    # config
-    #################################
 
     def do_print_config(self, arg):
 
         f = open('config.txt', 'r')
         for line in f:
             sys.stdout.write(line)
-
-    #################################
-    # status
-    ################################# 
 
     def do_status(self, arg):
         if self.server.is_server_running():
@@ -152,11 +117,6 @@ class psiTurk_Shell(Cmd):
             print 'Server: ' + color.RED + 'currently offline' + color.END
         print 'AMT worker site: ' + str(self.live) + ' HITs available'
         print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
-
-
-    #################################
-    # create_hit
-    #################################
 
     @docopt_cmd
     def do_create_hit(self, arg):
@@ -167,19 +127,18 @@ class psiTurk_Shell(Cmd):
         interactive = False
         if arg['<where>'] == None:
             interactive = True
-            r = raw_input('[' + color.BOLD + 's' + color.END + ']andbox or [' + color.BOLD + 'l' + color.END + ']ive? ')
-            if r=='s':
+            r = raw_input('[' + color.BOLD + 's' + color.END +
+                          ']andbox or [' + color.BOLD + 'l' + 
+                          color.END + ']ive? ')
+            if r == 's':
                 arg['<where>'] = 'sandbox'
-            elif r=='l':
+            elif r == 'l':
                 arg['<where>'] = 'live'
-           
-        if arg['<where>']!='sandbox' and arg['<where>']!='live':
+        if arg['<where>'] != 'sandbox' and arg['<where>'] != 'live':
             print '*** invalid experiment location'
             return
-
         if interactive:
             arg['<numWorkers>'] = raw_input('number of participants? ')
-            
         try:
             int(arg['<numWorkers>'])
         except ValueError:
@@ -202,11 +161,11 @@ class psiTurk_Shell(Cmd):
         except ValueError:
             print '*** duration must be a whole number'
             return
-        if int(arg['<duration>'])<= 0:
+        if int(arg['<duration>']) <= 0:
             print '*** duration must be greater than 0'
             return
         total = float(arg['<numWorkers>']) * float(arg['<reward>'])
-        fee = total/10
+        fee = total / 10
         total = total + fee
         print '*****************************'
         print '  Creating HIT on \'' + arg['<where>'] + '\''
@@ -217,47 +176,27 @@ class psiTurk_Shell(Cmd):
         print '    ________________________'
         print '    Total: $%.2f' % total
 
-
-    #################################
-    # setup_example
-    #################################
     def do_setup_example(self, arg):
         import setup_example as se
         se.setup_example()
 
-    #################################
-    # launch_server
-    #################################
     def do_launch_server(self, arg):
         print self.server.startup()
 
-
-    #################################
-    # shutdown_server
-    #################################
     def do_shutdown_server(self, arg):
         self.server.shutdown()
 
-    #################################
-    # restart_server
-    #################################
     def do_restart_server(self, arg):
         self.server.restart()
 
-    #################################
-    # get_workers
-    #################################
-    def do_get_workers(self, arg):
+     def do_get_workers(self, arg):
         services = MTurkServices(self.config)
         workers = services.get_workers()
-        if workers==False:
+        if not workers:
             print color.RED + "failed to get workers" + colorae.END
         else:
             print services.get_workers()
 
-    #################################
-    # approve_worker
-    #################################
     @docopt_cmd
     def do_approve_worker(self, arg):
         """
@@ -274,7 +213,7 @@ class psiTurk_Shell(Cmd):
                 if success:
                     print "approved " + arg["<assignment_id>"]
                 else:
-                    print "*** failed to approve "+ arg["<assignment_id>"]
+                    print "*** failed to approve " + arg["<assignment_id>"]
         else:
             for assignmentID in arg["<assignment_id>"]:
                 success = services.approve_worker(assignmentID)
@@ -283,9 +222,6 @@ class psiTurk_Shell(Cmd):
                 else:
                     print "*** failed to approve " + arg["<assignment_id>"]
     
-    #################################
-    # reject_worker
-    #################################
     @docopt_cmd
     def do_reject_worker(self, arg):
         """
@@ -299,27 +235,19 @@ class psiTurk_Shell(Cmd):
             else:
                 print  "*** failed to reject " + arg["<assignment_id>"]
 
-    #################################
-    # check_balance
-    #################################
     def do_check_balance(self, arg):
         services = MTurkServices(self.config)
         print services.check_balance()
         
-    #################################
-    # get_active_hits
-    #################################
+
     def do_get_active_hits(self, arg):
         services = MTurkServices(self.config)
         hits_data = services.get_active_hits()
-        if hits_data==False:
+        if not hits_data:
             print "*** failed to retrieve active hits"
         else:
             print hits_data
 
-    #################################
-    # extend_hit
-    #################################
     @docopt_cmd
     def do_extend_hit(self, arg):
         """
@@ -331,13 +259,10 @@ class psiTurk_Shell(Cmd):
         print arg
 
 
-#################################
-# run command loop
-#################################
 def run():
     opt = docopt(__doc__, sys.argv[1:])
     config = PsiturkConfig()
     config.load_config()
     server = control.ExperimentServerController(config)
-    shell =psiTurk_Shell(config, server)
+    shell = psiTurk_Shell(config, server)
     shell.cmdloop()
