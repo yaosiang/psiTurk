@@ -499,16 +499,10 @@ def regularpage(pagename=None):
 
 # # Initialize database if necessary
 def run_webserver():
-
-    from OpenSSL import SSL
-    context = SSL.Context(SSL.SSLv23_METHOD)
-    context.use_privatekey_file('ssl.key')
-    context.use_certificate_file('ssl.cert')
-
     host = "0.0.0.0"
     port = config.getint('Server Parameters', 'port')
     print "Serving on ", "http://" +  host + ":" + str(port)
-    app.run(debug=True, host=host, port=port, ssl_context=context)
+    app.run(debug=True, host=host, port=port)
 
 if __name__ == '__main__':
     run_webserver()

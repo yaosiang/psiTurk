@@ -81,8 +81,6 @@ class PsiturkConfig(SafeConfigParser):
         self.set('Server Parameters', 'login_username', 'examplename')
         self.set('Server Parameters', 'login_pw', 'examplepassword')
         self.set('Server Parameters', 'num_workers', '-1')
-        self.set('Server Parameters', 'ssl_keyfile', 'ssl.key')
-        self.set('Server Parameters', 'ssl_certfile', 'ssl.crt')
         
         # Task Parameters
         self.set('Task Parameters', 'code_version', '1.0')
