@@ -94,19 +94,9 @@ class psiTurk_Shell(Cmd):
         else:
             serverString =  color.RED + 'off' + color.END
 
-        prompt += ' exp:' + serverString
-        sandboxString =  ''
-        if self.sandbox:
-            sandboxString = '1'
-        else:
-            sandboxString = '0'
-        prompt += ' #sand:'+sandboxString
-        liveString = []
-        if self.live:
-            liveString = '1'
-        else:
-            liveString = '0'
-        prompt += ' #live:'+liveString
+        prompt += ' exp:' + serverString       
+        prompt += ' #sand:'+ str(self.sandbox)
+        prompt += ' #live:'+str(self.live)
         prompt += ']$ '
         self.prompt =  prompt
     
@@ -259,7 +249,11 @@ class psiTurk_Shell(Cmd):
     #################################
     def do_get_workers(self, arg):
         services = MTurkServices(self.config)
-        print services.get_workers()
+        workers = services.get_workers()
+        if workers==False:
+            print color.RED + "failed to get workers" + colorae.END
+        else:
+            print services.get_workers()
 
     #################################
     # approve_worker
@@ -276,16 +270,34 @@ class psiTurk_Shell(Cmd):
         if arg["--all"]:
             workers = services.get_workers()
             for worker in workers:
-                server.approve_worker(worker["assignmentId"])
+                success = services.approve_worker(worker["assignmentId"])
+                if success:
+                    print "approved " + arg["<assignment_id>"]
+                else:
+                    print "*** failed to approve "+ arg["<assignment_id>"]
         else:
             for assignmentID in arg["<assignment_id>"]:
-                server.approve_worker(assignmentID)
+                success = services.approve_worker(assignmentID)
+                if success:
+                    print "approved " + arg["<assignment_id>"]
+                else:
+                    print "*** failed to approve " + arg["<assignment_id>"]
     
     #################################
     # reject_worker
     #################################
- #   @docopt_cmd
-#    def do_reject_worker(self, arg):
+    @docopt_cmd
+    def do_reject_worker(self, arg):
+        """
+        Usage: reject_worker <assignment_id> ...
+        """
+        services = MTurkServices(self.config)
+        for assignmentID in arg["<assignment_id>"]:
+            success = services.reject_worker(assignmentID)
+            if success:
+                print "rejected " + arg["<assignment_id>"]
+            else:
+                print  "*** failed to reject " + arg["<assignment_id>"]
 
     #################################
     # check_balance
@@ -294,7 +306,29 @@ class psiTurk_Shell(Cmd):
         services = MTurkServices(self.config)
         print services.check_balance()
         
+    #################################
+    # get_active_hits
+    #################################
+    def do_get_active_hits(self, arg):
+        services = MTurkServices(self.config)
+        hits_data = services.get_active_hits()
+        if hits_data==False:
+            print "*** failed to retrieve active hits"
+        else:
+            print hits_data
+
+    #################################
+    # extend_hit
+    #################################
+    @docopt_cmd
+    def do_extend_hit(self, arg):
+        """
+        Usage: extend_hit <HITid> [options]
         
+        -a, --assignments    Increase number of assignments on HIT
+        -e, --expiration     Increase expiration time on HIT
+        """
+        print arg
 
 
 #################################
