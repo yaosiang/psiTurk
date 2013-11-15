@@ -21,6 +21,7 @@ import dashboard_server as dbs
 
 
 #Escape sequences for display
+
 class Color:
     PURPLE = '\033[95m'
     CYAN = '\033[96m'
@@ -61,7 +62,9 @@ def docopt_cmd(func):
     return fn
 
 
+
 class Psiturk_Shell(Cmd):
+
 
     def __init__(self, config, server):
         Cmd.__init__(self)
@@ -80,7 +83,6 @@ class Psiturk_Shell(Cmd):
             serverString = Color.GREEN + 'on' + Color.END
         else:
             serverString =  Color.RED + 'off' + Color.END
-
         prompt += ' exp:' + serverString       
         prompt += ' #sand:'+ str(self.sandbox)
         prompt += ' #live:'+str(self.live)
@@ -116,6 +118,7 @@ class Psiturk_Shell(Cmd):
             print 'Server: ' + Color.GREEN + 'currently online' + Color.END
         else:
             print 'Server: ' + Color.RED + 'currently offline' + Color.END
+
         print 'AMT worker site: ' + str(self.live) + ' HITs available'
         print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
 
@@ -143,6 +146,7 @@ class Psiturk_Shell(Cmd):
         try:
             int(arg['<numWorkers>'])
         except ValueError:
+
             print '*** number of participants must be a whole number'
             return
         if int(arg['<numWorkers>']) <= 0:
@@ -152,6 +156,7 @@ class Psiturk_Shell(Cmd):
             arg['<reward>'] = raw_input('reward per HIT? ')
         p = re.compile('\d*.\d\d')
         m = p.match(arg['<reward>'])
+
         if m is None:
             print '*** reward must have format [dollars].[cents]'
             return
@@ -190,7 +195,7 @@ class Psiturk_Shell(Cmd):
 
     def do_launch_server(self, arg):
         print self.server.startup()
-        
+
     def do_shutdown_server(self, arg):
         self.server.shutdown()
 
@@ -229,6 +234,7 @@ class Psiturk_Shell(Cmd):
                     print 'approved ' + arg['<assignment_id>']
                 else:
                     print '*** failed to approve ' + arg['<assignment_id>']
+
     
     @docopt_cmd
     def do_reject_worker(self, arg):
@@ -242,6 +248,7 @@ class Psiturk_Shell(Cmd):
                 print 'rejected ' + arg['<assignment_id>']
             else:
                 print  '*** failed to reject ' + arg['<assignment_id>']
+
 
     def do_check_balance(self, arg):
         services = MTurkServices(self.config)
@@ -267,6 +274,7 @@ class Psiturk_Shell(Cmd):
         services = MTurkServices(self.config)
         services.extend_hit(self, arg['<HITid>'], arg['--assignments'], 
                             arg['--expiration'])
+
     @docopt_cmd
     def do_expire_hit(self, arg):
         """
@@ -280,7 +288,6 @@ def run():
     opt = docopt(__doc__, sys.argv[1:])
     config = PsiturkConfig()
     config.load_config()
-
     server = control.ExperimentServerController(config)
     shell = Psiturk_Shell(config, server)
     shell.cmdloop()
