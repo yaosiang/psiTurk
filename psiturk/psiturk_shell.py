@@ -189,7 +189,7 @@ class psiTurk_Shell(Cmd):
     def do_restart_server(self, arg):
         self.server.restart()
 
-     def do_get_workers(self, arg):
+    def do_get_workers(self, arg):
         services = MTurkServices(self.config)
         workers = services.get_workers()
         if not workers:
