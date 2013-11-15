@@ -202,7 +202,7 @@ class Psiturk_Shell(Cmd):
         se.setup_example()
 
     def do_launch_server(self, arg):
-        print self.server.startup()
+        self.server.startup()
 
     def do_shutdown_server(self, arg):
         self.server.shutdown()

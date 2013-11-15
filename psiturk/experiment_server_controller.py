@@ -106,9 +106,11 @@ class ExperimentServerController:
         print("Shutting down experiment server at pid %s..." % ppid)
         try:
             os.kill(int(ppid), signal.SIGKILL)
+            self.server_running = False
         except ExperimentServerControllerException:
             print ExperimentServerControllerException
-        else: self.server_running = False
+        else:
+            self.server_running = False
     
     def is_server_running(self):
         return self.server_running
@@ -121,11 +123,11 @@ class ExperimentServerController:
             python_exec = sys.executable,
             server_script = os.path.join(os.path.dirname(__file__), "experiment_server.py")
         )
-        if self.is_port_available():
-            print("Running experiment server with command:", server_command)
+        print self.is_port_available(), " ", self.is_server_running()
+        if self.is_port_available() and not self.is_server_running():
+            #print "Running experiment server with command:", server_command
             subprocess.Popen(server_command, shell=True, close_fds=True)
+            print "Experiment server launching..."
             self.server_running = True
-            return("Experiment server launching...")
         else:
-            self.server_running = True
-            return("Experiment server may be already running...")
+            print "Experiment server may be already running..."
