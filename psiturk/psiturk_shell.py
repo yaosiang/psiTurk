@@ -66,12 +66,11 @@ def docopt_cmd(func):
 class Psiturk_Shell(Cmd):
 
 
-    def __init__(self, config, server):
+    def __init__(self, config, services, server):
         Cmd.__init__(self)
         self.config = config
         self.server = server
-        self.live = 0
-        self.sandbox = 0
+        self.services = services
         self.color_prompt()
         self.intro = Color.GREEN + 'psiTurk version ' + version_number + \
                      '\nType "help" for more information.' + Color.END
@@ -83,9 +82,19 @@ class Psiturk_Shell(Cmd):
             serverString = Color.GREEN + 'on' + Color.END
         else:
             serverString =  Color.RED + 'off' + Color.END
-        prompt += ' exp:' + serverString       
-        prompt += ' #sand:'+ str(self.sandbox)
-        prompt += ' #live:'+str(self.live)
+        prompt += ' server:' + serverString  
+        usingSandbox = self.config.getboolean('HIT Configuration', 'using_sandbox')
+        activeString = ''
+        if usingSandbox:
+            activeString = ' #sandboxHITs:'
+        else:
+            activeString = ' #liveHITs:'        
+        hits = self.services.get_active_hits()
+        if hits:
+            numHits = len(hits)
+            prompt += activeString + str(numHits)
+        else:
+            prompt += ' #HITs:0'
         prompt += ']$ '
         self.prompt =  prompt
     
@@ -174,8 +183,7 @@ class Psiturk_Shell(Cmd):
                         arg['<numWorkers>'])
         self.config.set('HIT Configuration', 'reward', arg['<reward>'])
         self.config.set('HIT Configuration', 'duration', arg['<duration>'])
-        services = MTurkServices(self.config)
-        services.create_hit()
+        self.services.create_hit()
         #print results
         total = float(arg['<numWorkers>']) * float(arg['<reward>'])
         fee = total / 10
@@ -203,12 +211,11 @@ class Psiturk_Shell(Cmd):
         self.server.restart()
 
     def do_get_workers(self, arg):
-        services = MTurkServices(self.config)
-        workers = services.get_workers()
+        workers = self.services.get_workers()
         if not workers:
             print Color.RED + 'failed to get workers' + Color.END
         else:
-            print services.get_workers()
+            print self.services.get_workers()
 
     @docopt_cmd
     def do_approve_worker(self, arg):
@@ -218,18 +225,17 @@ class Psiturk_Shell(Cmd):
         --all        approve all completed workers
 
         """
-        services = MTurkServices(self.config)
         if arg['--all']:
-            workers = services.get_workers()
+            workers = self.services.get_workers()
             for worker in workers:
-                success = services.approve_worker(worker['assignmentId'])
+                success = self.services.approve_worker(worker['assignmentId'])
                 if success:
                     print 'approved ' + arg['<assignment_id>']
                 else:
                     print '*** failed to approve ' + arg['<assignment_id>']
         else:
             for assignmentID in arg['<assignment_id>']:
-                success = services.approve_worker(assignmentID)
+                success = self.services.approve_worker(assignmentID)
                 if success:
                     print 'approved ' + arg['<assignment_id>']
                 else:
@@ -241,9 +247,8 @@ class Psiturk_Shell(Cmd):
         """
         Usage: reject_worker <assignment_id> ...
         """
-        services = MTurkServices(self.config)
         for assignmentID in arg['<assignment_id>']:
-            success = services.reject_worker(assignmentID)
+            success = self.services.reject_worker(assignmentID)
             if success:
                 print 'rejected ' + arg['<assignment_id>']
             else:
@@ -251,13 +256,11 @@ class Psiturk_Shell(Cmd):
 
 
     def do_check_balance(self, arg):
-        services = MTurkServices(self.config)
-        print services.check_balance()
+        print self.services.check_balance()
         
 
     def do_get_active_hits(self, arg):
-        services = MTurkServices(self.config)
-        hits_data = services.get_active_hits()
+        hits_data = self.services.get_active_hits()
         if not hits_data:
             print '*** failed to retrieve active hits'
         else:
@@ -271,8 +274,7 @@ class Psiturk_Shell(Cmd):
         -a <number>, --assignments <number>    Increase number of assignments on HIT
         -e <time>, --expiration <time>         Increase expiration time on HIT (hours)
         """
-        services = MTurkServices(self.config)
-        services.extend_hit(self, arg['<HITid>'], arg['--assignments'], 
+        self.services.extend_hit(self, arg['<HITid>'], arg['--assignments'], 
                             arg['--expiration'])
 
     @docopt_cmd
@@ -280,14 +282,13 @@ class Psiturk_Shell(Cmd):
         """
         Usage: expire_hit <HITid>
         """
-        services = MTurkServices(self.config)
-        services.expire_hit(arg['<HITid>'])
-
+        self.services.expire_hit(arg['<HITid>'])
 
 def run():
     opt = docopt(__doc__, sys.argv[1:])
     config = PsiturkConfig()
     config.load_config()
+    services = MTurkServices(config)
     server = control.ExperimentServerController(config)
-    shell = Psiturk_Shell(config, server)
+    shell = Psiturk_Shell(config, services, server)
     shell.cmdloop()
