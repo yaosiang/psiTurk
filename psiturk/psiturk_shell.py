@@ -19,7 +19,6 @@ from psiturk_config import PsiturkConfig
 import experiment_server_controller as control
 import dashboard_server as dbs
 
-
 #Escape sequences for display
 
 class Color:
@@ -78,10 +77,13 @@ class Psiturk_Shell(Cmd):
     def color_prompt(self):
         prompt =  '[' + Color.BOLD + 'psiTurk' + Color.END
         serverSring = ''
-        if self.server.is_server_running():
+        server_status = self.server.is_server_running()
+        if server_status == 'yes':
             serverString = Color.GREEN + 'on' + Color.END
-        else:
+        elif server_status == 'no':
             serverString =  Color.RED + 'off' + Color.END
+        elif server_status == 'maybe':
+            serverString = Color.YELLOW + 'wait' + Color.END
         prompt += ' server:' + serverString  
         usingSandbox = self.config.getboolean('HIT Configuration', 'using_sandbox')
         activeString = ''
@@ -123,11 +125,13 @@ class Psiturk_Shell(Cmd):
             sys.stdout.write(line)
 
     def do_status(self, arg):
-        if self.server.is_server_running():
+        server_status = self.server.is_server_running()
+        if server_status == 'yes':
             print 'Server: ' + Color.GREEN + 'currently online' + Color.END
-        else:
+        elif server_status == 'no':
             print 'Server: ' + Color.RED + 'currently offline' + Color.END
-
+        elif server_status == 'maybe':
+            print 'Server: ' + Color.YELLOW + 'please wait' + Color.END
         print 'AMT worker site: ' + str(self.live) + ' HITs available'
         print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
 

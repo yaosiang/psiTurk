@@ -6,6 +6,7 @@ from threading import Thread, Event
 import urllib2
 import socket
 
+
 #!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Supporting functions
 #   general purpose helper functions used by the dashboard server and controller
@@ -15,9 +16,9 @@ def is_port_available(ip, port):
     try:
         s.connect((ip, int(port)))
         s.shutdown(2)
-        return 0
+        return False
     except:
-        return 1
+        return True
 
 def wait_until_online(function, ip, port):
     """
@@ -113,7 +114,16 @@ class ExperimentServerController:
             self.server_running = False
     
     def is_server_running(self):
-        return self.server_running
+        portopen = self.is_port_available()
+        #print self.server_running, " ", portopen
+        if self.server_running and portopen:  # server running but port open, maybe starting up
+            return 'maybe'
+        elif not self.server_running and not portopen: # server not running but port blocked maybe shutting down
+            return 'maybe'
+        elif self.server_running and not portopen: # server running, port blocked, makes sense
+            return 'yes'
+        elif not self.server_running and portopen: # server off, port open, makes sense
+            return 'no'
 
     def is_port_available(self):
         return is_port_available(self.config.get("Server Parameters", "host"), self.config.getint("Server Parameters", "port"))
@@ -123,8 +133,7 @@ class ExperimentServerController:
             python_exec = sys.executable,
             server_script = os.path.join(os.path.dirname(__file__), "experiment_server.py")
         )
-        print self.is_port_available(), " ", self.is_server_running()
-        if self.is_port_available() and not self.is_server_running():
+        if self.is_port_available() and not self.server_running:
             #print "Running experiment server with command:", server_command
             subprocess.Popen(server_command, shell=True, close_fds=True)
             print "Experiment server launching..."
