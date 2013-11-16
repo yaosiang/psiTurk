@@ -100,9 +100,18 @@ class Psiturk_Shell(Cmd):
         prompt += ']$ '
         self.prompt =  prompt
     
+    def onecmd_plus_hooks(self, line):
+        if not line:
+            return self.emptyline()
+        return Cmd.onecmd_plus_hooks(self, line)
+
+
     def postcmd(self, stop, line):
         self.color_prompt()
         return Cmd.postcmd(self, stop, line)
+
+    def emptyline(self):
+        self.color_prompt()
 
     @docopt_cmd
     def do_dashboard(self, arg):
@@ -119,7 +128,6 @@ class Psiturk_Shell(Cmd):
         print 'psiTurk version ' + version_number
 
     def do_print_config(self, arg):
-
         f = open('config.txt', 'r')
         for line in f:
             sys.stdout.write(line)
@@ -132,9 +140,9 @@ class Psiturk_Shell(Cmd):
             print 'Server: ' + Color.RED + 'currently offline' + Color.END
         elif server_status == 'maybe':
             print 'Server: ' + Color.YELLOW + 'please wait' + Color.END
-        print 'AMT worker site: ' + str(self.live) + ' HITs available'
-        print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
-
+  #      print 'AMT worker site: ' + str(self.live) + ' HITs available'
+  #      print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
+ 
     @docopt_cmd
     def do_create_hit(self, arg):
         """
