@@ -65,6 +65,7 @@ class PsiturkConfig(SafeConfigParser):
         self.set('HIT Configuration', 'US_only', 'true')
         self.set('HIT Configuration', 'Approve_Requirement', '95')
         self.set('HIT Configuration', 'using_sandbox', 'true')
+        self.set('HIT Configuration', 'support_IE', 'true')
 
         # Database Parameters
         self.set('Database Parameters', 'database_url', 'sqlite:///participants.db')
@@ -74,7 +75,6 @@ class PsiturkConfig(SafeConfigParser):
         self.set('Server Parameters', 'host', 'localhost')
         self.set('Server Parameters', 'port', '22362')
         self.set('Server Parameters', 'cutoff_time', '30')
-        self.set('Server Parameters', 'support_IE', 'true')
         self.set('Server Parameters', 'logfile', 'server.log')
         self.set('Server Parameters', 'loglevel', '2')
         self.set('Server Parameters', 'debug', 'true')

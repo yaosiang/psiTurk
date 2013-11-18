@@ -37,7 +37,7 @@ CODE_VERSION = config.get('Task Parameters', 'code_version')
 
 # Database configuration and constants
 TABLENAME = config.get('Database Parameters', 'table_name')
-SUPPORT_IE = config.getboolean('Server Parameters', 'support_IE')
+SUPPORT_IE = config.getboolean('HIT Configuration', 'support_ie')
 
 # Status codes
 ALLOCATED = 1
