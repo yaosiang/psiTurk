@@ -2,6 +2,7 @@ import os, sys
 import subprocess,signal
 from threading import Thread, Event
 import urllib2
+import json
 import datetime
 from boto.mturk.connection import MTurkConnection, MTurkRequestError
 from boto.mturk.question import ExternalQuestion
@@ -107,10 +108,27 @@ class MTurkServices:
             host=host)
         self.mtc = MTurkConnection(**mturkparams)
         
+    def register_ad(self):
+        # register with the ad server (psiturk.org/ad/register?server=&port=&support_ie=)
+        server = self.config.get('Server Parameters', 'host')
+        port = self.config.get('Server Parameters', 'port')
+        support_ie = self.config.get('HIT Configuration', 'support_ie')
+        #ad_server_register_url = 'https://psiturk.org/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
+        ad_server_register_url = 'http://localhost:5004/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
+        response = urllib2.urlopen(ad_server_register_url)
+        # 2. get id in response
+        data = json.load(response) 
+        if data['id'] == '-1':
+            print "Error registering add with server!!"
+        return data['id']
+
     def configure_hit(self):
 
-        # Configure portal
-        experimentPortalURL = self.config.get('HIT Configuration', 'question_url')
+        ad_id = self.register_ad()
+        # 3. configure question_url based on the id
+        # experimentPortalURL = 'https://psiturk.org/ad/' + data['id'] 
+        experimentPortalURL = 'http://localhost:5004/ad/' + str(ad_id)
+        print experimentPortalURL
         frameheight = 600
         mturkQuestion = ExternalQuestion(experimentPortalURL, frameheight)
 
