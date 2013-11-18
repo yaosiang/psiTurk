@@ -1,5 +1,5 @@
 """
-Usage: 
+Usage:
     psiturk_shell
     psiturk_shell setup_example
     psiturk_shell dashboard
@@ -7,7 +7,7 @@ Usage:
 """
 import sys
 import re
-
+import time
 
 from cmd2 import Cmd
 from docopt import docopt, DocoptExit
@@ -20,20 +20,29 @@ import experiment_server_controller as control
 import dashboard_server as dbs
 
 #Escape sequences for display
-
-class Color:
-    PURPLE = '\033[95m'
-    CYAN = '\033[96m'
-    DARKCYAN = '\033[36m'
-    BLUE = '\033[94m'
-    GREEN = '\033[92m'
-    YELLOW = '\033[93m'
-    RED = '\033[91m'
-    BOLD = '\033[1m'
-    WHITE = '\033[37m'
-    UNDERLINE = '\033[4m'
-    END = '\033[0m'
-
+def colorize(target, color):
+    colored = ''
+    if color == 'purple':
+        colored = '\033[95m' + target
+    elif color == 'cyan':
+        colored = '\033[96m' + target
+    elif color == 'darkcyan':
+        colored = '\033[36m' + target
+    elif color == 'blue':
+        colored = '\033[93m' + target
+    elif color == 'green':
+        colored = '\033[92m' + target
+    elif color == 'yellow':
+        colored = '\033[93m' + target
+    elif color == 'red':
+        colored = '\033[91m' + target
+    elif color == 'white':
+        colored = '\033[37m' + target
+    elif color == 'bold':
+        colored = '\033[1m' + target
+    elif color == 'underline':
+        colored = '\033[4m' + target
+    return colored + '\033[0m'
 
 # decorator function borrowed from docopt
 def docopt_cmd(func):
@@ -70,36 +79,36 @@ class Psiturk_Shell(Cmd):
         self.config = config
         self.server = server
         self.services = services
+        self.sandbox = self.config.getboolean('HIT Configuration', 'using_sandbox')
+        self.sandboxHITs = 0
+        self.liveHITs = 0
+        self.check_hits()
         self.color_prompt()
-        self.intro = Color.GREEN + 'psiTurk version ' + version_number + \
-                     '\nType "help" for more information.' + Color.END
+        self.intro = colorize('psiTurk version ' + version_number + \
+                     '\nType "help" for more information.', 'green')
 
     def color_prompt(self):
-        prompt =  '[' + Color.BOLD + 'psiTurk' + Color.END
+        prompt =  '[' + colorize( 'psiTurk', 'bold')
         serverSring = ''
         server_status = self.server.is_server_running()
         if server_status == 'yes':
-            serverString = Color.GREEN + 'on' + Color.END
+            serverString = colorize('on', 'green')
         elif server_status == 'no':
-            serverString =  Color.RED + 'off' + Color.END
+            serverString =  colorize('off', 'red')
         elif server_status == 'maybe':
-            serverString = Color.YELLOW + 'wait' + Color.END
-        prompt += ' server:' + serverString  
-        usingSandbox = self.config.getboolean('HIT Configuration', 'using_sandbox')
-        activeString = ''
-        if usingSandbox:
-            activeString = ' #sandboxHITs:'
+            serverString = colorize('wait', 'yellow')
+        prompt += ' server:' + serverString
+        if self.sandbox:
+            prompt += ' mode:' + colorize('sdbx', 'bold')
         else:
-            activeString = ' #liveHITs:'        
-        hits = self.services.get_active_hits()
-        if hits:
-            numHits = len(hits)
-            prompt += activeString + str(numHits)
+            prompt += ' mode:' + colorize('live', 'bold')
+        if self.sandbox:
+            prompt += ' #HITs:' + str(self.sandboxHITs)
         else:
-            prompt += ' #HITs:0'
+            prompt += ' #HITs:' + str(self.liveHITs)
         prompt += ']$ '
         self.prompt =  prompt
-    
+
     def onecmd_plus_hooks(self, line):
         if not line:
             return self.emptyline()
@@ -114,10 +123,33 @@ class Psiturk_Shell(Cmd):
         self.color_prompt()
 
     @docopt_cmd
+    def do_mode(self, arg):
+        """        
+        Usage: mode
+               mode <which>
+        """
+        if arg['<which>'] is None:
+            if self.sandbox:
+                arg['<which>'] = 'live'
+            else:
+                arg['<which>'] = 'sandbox'
+        if arg['<which>']=='live':
+            self.sandbox = False
+            self.config.set('HIT Configuration', 'using_sandbox', False)
+            self.check_hits()
+            print 'Entered ' + colorize('live', 'bold') + ' mode'
+        else:
+            self.sandbox = True
+            self.config.set('HIT Configuration', 'using_sandbox', True)
+            self.check_hits()
+            print 'Entered ' + colorize('sandbox', 'bold') + ' mode'
+        
+
+    @docopt_cmd
     def do_dashboard(self, arg):
         """
         Usage: dashboard [options]
-   
+
         -i <address>, --ip <address>    IP to run dashboard on. [default: localhost].
         -p <num>, --port <num>          Port to run dashboard on. [default: 22361].
         """
@@ -135,13 +167,24 @@ class Psiturk_Shell(Cmd):
     def do_status(self, arg):
         server_status = self.server.is_server_running()
         if server_status == 'yes':
-            print 'Server: ' + Color.GREEN + 'currently online' + Color.END
+            print 'Server: ' + colorize('currently online', 'green')
         elif server_status == 'no':
-            print 'Server: ' + Color.RED + 'currently offline' + Color.END
+            print 'Server: ' + colorize('currently offline', 'red')
         elif server_status == 'maybe':
-            print 'Server: ' + Color.YELLOW + 'please wait' + Color.END
-  #      print 'AMT worker site: ' + str(self.live) + ' HITs available'
-  #      print 'AMT woker sandbox: ' + str(self.sandbox) + ' HITs available'
+            print 'Server: ' + colorize('please wait', 'yellow')
+        self.check_hits()
+        if self.sandbox:
+            print 'AMT worker site - ' + colorize('sandbox', 'bold') +  ': ' + str(self.sandboxHITs) + ' HITs available'
+        else:
+            print 'AMT worker site - ' + colorize('live', 'bold') + ': ' + str(self.liveHITs) + ' HITs available'
+
+    def check_hits(self):
+        hits = self.services.get_active_hits()
+        if hits:
+            if self.sandbox:
+                self.sandboxHITs = len(hits)
+            else:
+                self.liveHITs = len(hits)
  
     @docopt_cmd
     def do_create_hit(self, arg):
@@ -152,9 +195,9 @@ class Psiturk_Shell(Cmd):
         interactive = False
         if arg['<where>'] is None:
             interactive = True
-            r = raw_input('[' + Color.BOLD + 's' + Color.END +
-                          ']andbox or [' + Color.BOLD + 'l' + 
-                          Color.END + ']ive? ')
+            r = raw_input('[' + colorize('s', 'bold') +
+                          ']andbox or [' + colorize('l', bold) 
+                           + ']ive? ')
             if r == 's':
                 arg['<where>'] = 'sandbox'
             elif r == 'l':
@@ -191,11 +234,21 @@ class Psiturk_Shell(Cmd):
         if int(arg['<duration>']) <= 0:
             print '*** duration must be greater than 0'
             return
+        if arg['<where>'] == 'live':
+            self.config.set('HIT Configuration', 'using_sandbox', False)
+            self.sandbox = False
+        else:
+            self.config.set('HIT Configuration', 'using_sandbox', True)
+            self.sandbox = True
         self.config.set('HIT Configuration', 'max_assignments',
                         arg['<numWorkers>'])
         self.config.set('HIT Configuration', 'reward', arg['<reward>'])
         self.config.set('HIT Configuration', 'duration', arg['<duration>'])
         self.services.create_hit()
+        if self.sandbox:
+            self.sandboxHITs += 1
+        else:
+            self.liveHITs += 1
         #print results
         total = float(arg['<numWorkers>']) * float(arg['<reward>'])
         fee = total / 10
@@ -215,9 +268,14 @@ class Psiturk_Shell(Cmd):
 
     def do_launch_server(self, arg):
         self.server.startup()
+        while self.server.is_server_running() != 'yes':
+            time.sleep(1)
+            
 
     def do_shutdown_server(self, arg):
         self.server.shutdown()
+        while self.server.is_server_running() != 'no':
+            time.sleep(1)
 
     def do_restart_server(self, arg):
         self.server.restart()
@@ -225,7 +283,7 @@ class Psiturk_Shell(Cmd):
     def do_get_workers(self, arg):
         workers = self.services.get_workers()
         if not workers:
-            print Color.RED + 'failed to get workers' + Color.END
+            print colorize('failed to get workers', 'red')
         else:
             print self.services.get_workers()
 
@@ -253,7 +311,7 @@ class Psiturk_Shell(Cmd):
                 else:
                     print '*** failed to approve ' + arg['<assignment_id>']
 
-    
+
     @docopt_cmd
     def do_reject_worker(self, arg):
         """
@@ -269,7 +327,7 @@ class Psiturk_Shell(Cmd):
 
     def do_check_balance(self, arg):
         print self.services.check_balance()
-        
+
 
     def do_get_active_hits(self, arg):
         hits_data = self.services.get_active_hits()
@@ -282,7 +340,7 @@ class Psiturk_Shell(Cmd):
     def do_extend_hit(self, arg):
         """
         Usage: extend_hit <HITid> [options]
-        
+
         -a <number>, --assignments <number>    Increase number of assignments on HIT
         -e <time>, --expiration <time>         Increase expiration time on HIT (hours)
         """
@@ -295,6 +353,10 @@ class Psiturk_Shell(Cmd):
         Usage: expire_hit <HITid>
         """
         self.services.expire_hit(arg['<HITid>'])
+        if self.sandbox:
+            self.sandboxHITs -= 1
+        else:
+            self.liveHITs -= 1
 
 def run():
     opt = docopt(__doc__, sys.argv[1:])
