@@ -41,6 +41,7 @@ TABLENAME = config.get('Database Parameters', 'table_name')
 SUPPORT_IE = config.getboolean('HIT Configuration', 'support_ie')
 
 # Status codes
+NOT_ACCEPTED = 0
 ALLOCATED = 1
 STARTED = 2
 COMPLETED = 3
@@ -159,6 +160,30 @@ def get_random_condcount():
 @app.route('/')
 def index():
     return render_template('default.html')
+
+@app.route('/check_worker_status', methods=['GET'])
+def check_worker_status():
+    if not (request.args.has_key('hitId') and \
+            request.args.has_key('assignmentId') and \
+            request.args.has_key('workerId')):
+        resp = {"status": "bad request"}
+        return jsonify(**resp)
+    else:
+        workerId = request.args['workerId']
+        assignmentId = request.args['assignmentId']
+        hitId = request.args['hitId']
+        try:
+            part = Participant.query.\
+                   filter(Participant.hitid == hitId).\
+                   filter(Participant.assignmentid == assignmentId).\
+                   filter(Participant.workerid == workerId).\
+                   one()
+            status = part.status
+        except:
+            status = NOT_ACCEPTED
+        resp = {"status" : status}
+        return jsonify(**resp)
+
 
 @app.route('/ad', methods=['GET'])
 def advertisement():
