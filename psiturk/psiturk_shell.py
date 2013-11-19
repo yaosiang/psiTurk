@@ -108,7 +108,7 @@ class Psiturk_Shell(Cmd):
             serverString = colorize('wait', 'yellow')
         prompt += ' server:' + serverString
         if self.sandbox:
-            prompt += ' mode:' + 'bold' + colorize('sdbx', 'bold')
+            prompt += ' mode:' + colorize('sdbx', 'bold')
         else:
             prompt += ' mode:' + colorize('live', 'bold')
         if self.sandbox:
@@ -283,12 +283,14 @@ class Psiturk_Shell(Cmd):
 
     def do_shutdown_server(self, arg):
         self.server.shutdown()
+        print 'Please wait. This could take a few seconds.'
         while self.server.is_server_running() != 'no':
             time.sleep(0.5)
 
 # this doesn't work with the server's slow shutdown right now
-#    def do_restart_server(self, arg):
-#        self.server.restart()
+    def do_restart_server(self, arg):
+        self.do_shutdown_server('')
+        self.do_launch_server('')
 
     def do_get_workers(self, arg):
         workers = self.services.get_workers()
