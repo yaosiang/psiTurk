@@ -345,7 +345,7 @@ class Psiturk_Shell(Cmd):
     def do_get_active_hits(self, arg):
         hits_data = self.services.get_active_hits()
         if not hits_data:
-            print '*** failed to retrieve active hits'
+            print '*** no active hits retrieved'
         else:
             print json.dumps(hits_data, indent=4, separators=(',', ': '))
 
