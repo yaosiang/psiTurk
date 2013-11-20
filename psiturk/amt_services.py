@@ -110,7 +110,7 @@ class MTurkServices:
         
     def register_ad(self):
         # register with the ad server (psiturk.org/ad/register?server=&port=&support_ie=)
-        server = self.config.get('Server Parameters', 'host')
+        server = json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']  # use a remote site to determing "public facing ip"
         port = self.config.get('Server Parameters', 'port')
         support_ie = self.config.get('HIT Configuration', 'support_ie')
         ad_server_register_url = 'https://psiturk.org/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
