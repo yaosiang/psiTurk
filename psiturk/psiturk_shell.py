@@ -292,7 +292,7 @@ class Psiturk_Shell(Cmd):
         self.do_stop_server('')
         self.do_start_server('')
 
-    def do_get_workers(self, arg):
+    def do_list_workers(self, arg):
         workers = self.services.get_workers()
         if not workers:
             print colorize('failed to get workers', 'red')
