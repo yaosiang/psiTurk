@@ -89,7 +89,7 @@ class Psiturk_Shell(Cmd):
                                               'using_sandbox')
         self.sandboxHITs = 0
         self.liveHITs = 0
-        self.check_hits()
+        self.tally_hits()
         self.color_prompt()
         self.intro = colorize('psiTurk version ' + version_number + \
                      '\nType "help" for more information.', 'green')
@@ -145,12 +145,12 @@ class Psiturk_Shell(Cmd):
         if arg['<which>']=='live':
             self.sandbox = False
             self.config.set('HIT Configuration', 'using_sandbox', False)
-            self.check_hits()
+            self.tally_hits()
             print 'Entered ' + colorize('live', 'bold') + ' mode'
         else:
             self.sandbox = True
             self.config.set('HIT Configuration', 'using_sandbox', True)
-            self.check_hits()
+            self.tally_hits()
             print 'Entered ' + colorize('sandbox', 'bold') + ' mode'
 
 
@@ -181,13 +181,13 @@ class Psiturk_Shell(Cmd):
             print 'Server: ' + colorize('currently offline', 'red')
         elif server_status == 'maybe':
             print 'Server: ' + colorize('please wait', 'yellow')
-        self.check_hits()
+        self.tally_hits()
         if self.sandbox:
             print 'AMT worker site - ' + colorize('sandbox', 'bold') +  ': ' + str(self.sandboxHITs) + ' HITs available'
         else:
             print 'AMT worker site - ' + colorize('live', 'bold') + ': ' + str(self.liveHITs) + ' HITs available'
 
-    def check_hits(self):
+    def tally_hits(self):
         hits = self.services.get_active_hits()
         if hits:
             if self.sandbox:
@@ -199,22 +199,11 @@ class Psiturk_Shell(Cmd):
     def do_create_hit(self, arg):
         """
         Usage: create_hit
-               create_hit <where> <numWorkers> <reward> <duration>
+               create_hit <numWorkers> <reward> <duration>
         """
         interactive = False
-        if arg['<where>'] is None:
+        if arg['<numWorkers>'] is None:
             interactive = True
-            r = raw_input('[' + colorize('s', 'bold') +
-                          ']andbox or [' + colorize('l', bold) 
-                           + ']ive? ')
-            if r == 's':
-                arg['<where>'] = 'sandbox'
-            elif r == 'l':
-                arg['<where>'] = 'live'
-        if arg['<where>'] != 'sandbox' and arg['<where>'] != 'live':
-            print '*** invalid experiment location'
-            return
-        if interactive:
             arg['<numWorkers>'] = raw_input('number of participants? ')
         try:
             int(arg['<numWorkers>'])
@@ -229,7 +218,6 @@ class Psiturk_Shell(Cmd):
             arg['<reward>'] = raw_input('reward per HIT? ')
         p = re.compile('\d*.\d\d')
         m = p.match(arg['<reward>'])
-
         if m is None:
             print '*** reward must have format [dollars].[cents]'
             return
@@ -243,12 +231,6 @@ class Psiturk_Shell(Cmd):
         if int(arg['<duration>']) <= 0:
             print '*** duration must be greater than 0'
             return
-        if arg['<where>'] == 'live':
-            self.config.set('HIT Configuration', 'using_sandbox', False)
-            self.sandbox = False
-        else:
-            self.config.set('HIT Configuration', 'using_sandbox', True)
-            self.sandbox = True
         self.config.set('HIT Configuration', 'max_assignments',
                         arg['<numWorkers>'])
         self.config.set('HIT Configuration', 'reward', arg['<reward>'])
@@ -271,28 +253,29 @@ class Psiturk_Shell(Cmd):
             print '    ________________________'
             print '    Total: $%.2f' % total
 
+
     def do_setup_example(self, arg):
         import setup_example as se
         se.setup_example()
 
-    def do_launch_server(self, arg):
+    def do_start_server(self, arg):
         self.server.startup()
         while self.server.is_server_running() != 'yes':
             time.sleep(0.5)
 
 
-    def do_shutdown_server(self, arg):
+    def do_stop_server(self, arg):
         self.server.shutdown()
         print 'Please wait. This could take a few seconds.'
         while self.server.is_server_running() != 'no':
             time.sleep(0.5)
 
-# this doesn't work with the server's slow shutdown right now
+    # this doesn't work with the server's slow shutdown right now
     def do_restart_server(self, arg):
-        self.do_shutdown_server('')
-        self.do_launch_server('')
+        self.do_stop_server('')
+        self.do_start_server('')
 
-    def do_get_workers(self, arg):
+    def do_list_workers(self, arg):
         workers = self.services.get_workers()
         if not workers:
             print colorize('failed to get workers', 'red')
@@ -304,48 +287,47 @@ class Psiturk_Shell(Cmd):
     def do_approve_worker(self, arg):
         """
         Usage: approve_worker (--all | <assignment_id> ...)
-        Options:
-        --all        approve all completed workers
+
+        -a, --all        approve all completed workers
 
         """
         if arg['--all']:
             workers = self.services.get_workers()
-            for worker in workers:
-                success = self.services.approve_worker(worker['assignmentId'])
-                if success:
-                    print 'approved ' + arg['<assignment_id>']
-                else:
-                    print '*** failed to approve ' + arg['<assignment_id>']
-        else:
-            for assignmentID in arg['<assignment_id>']:
-                success = self.services.approve_worker(assignmentID)
-                if success:
-                    print 'approved ' + arg['<assignment_id>']
-                else:
-                    print '*** failed to approve ' + arg['<assignment_id>']
+            arg['<assignment_id>'] = [worker['assignmentId'] for worker in workers]
+        for assignmentID in arg['<assignment_id>']:
+            success = self.services.approve_worker(assignmentID)
+            if success:
+                print 'approved', assignmentID
+            else:
+                print '*** failed to approve', assignmentID
 
 
     @docopt_cmd
     def do_reject_worker(self, arg):
         """
-        Usage: reject_worker <assignment_id> ...
+        Usage: reject_worker (--all | <assignment_id> ...)
+
+        -a, --all           reject all completed workers
         """
+        if arg['--all']:
+            workers = self.services.get_workers()
+            arg['<assignment_it>'] = [worker['assignmentId'] for worker in workers]
         for assignmentID in arg['<assignment_id>']:
             success = self.services.reject_worker(assignmentID)
             if success:
-                print 'rejected ' + arg['<assignment_id>']
+                print 'rejected', assignmentID
             else:
-                print  '*** failed to reject ' + arg['<assignment_id>']
+                print  '*** failed to reject', assignmentID
 
 
     def do_check_balance(self, arg):
         print self.services.check_balance()
 
 
-    def do_get_active_hits(self, arg):
+    def do_list_active_hits(self, arg):
         hits_data = self.services.get_active_hits()
         if not hits_data:
-            print '*** failed to retrieve active hits'
+            print '*** no active hits retrieved'
         else:
             print json.dumps(hits_data, indent=4, separators=(',', ': '))
 
@@ -363,22 +345,34 @@ class Psiturk_Shell(Cmd):
     @docopt_cmd
     def do_expire_hit(self, arg):
         """
-        Usage: expire_hit <HITid>
+        Usage: expire_hit (--all | <HITid> ...)
+
+        -a, --all              expire all HITs
         """
-        self.services.expire_hit(arg['<HITid>'])
-        if self.sandbox:
-            self.sandboxHITs -= 1
-        else:
-            self.liveHITs -= 1
-    
+        if arg['--all']:
+            hits_data = self.services.get_active_hits()
+            arg['<HITid>'] = [hit['hitid'] for hit in hits_data]
+        for hit in arg['<HITid>']:
+            self.services.expire_hit(hit)
+            if self.sandbox:
+                print "expiring sandbox HIT", hit
+                self.sandboxHITs -= 1
+            else:
+                print "expiring live HIT", hit
+                self.liveHITs -= 1
+
     def do_eof(self, arg):
         self.do_quit(arg)
         return True
 
     def do_quit(self, arg):
         if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe':
-            self.do_shutdown_server('')
-        exit()
+            r = raw_input("Quitting shell will shut down experiment server. Really quit? y or n: ")
+            if r=='y':
+                self.do_stop_server('')
+            else:
+                return
+        return True
 
 def run():
     opt = docopt(__doc__, sys.argv[1:])
