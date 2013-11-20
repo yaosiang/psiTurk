@@ -113,21 +113,24 @@ class MTurkServices:
         server = self.config.get('Server Parameters', 'host')
         port = self.config.get('Server Parameters', 'port')
         support_ie = self.config.get('HIT Configuration', 'support_ie')
-        #ad_server_register_url = 'https://psiturk.org/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
-        ad_server_register_url = 'http://localhost:5004/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
+        ad_server_register_url = 'https://psiturk.org/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
+        #ad_server_register_url = 'http://localhost:5004/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
         response = urllib2.urlopen(ad_server_register_url)
         # 2. get id in response
         data = json.load(response) 
-        if data['id'] == '-1':
-            print "Error registering add with server!!"
+        if data['id'] == "correct parameters not provided":
+            print "Error: registering Ad with server, you didn't provide all the required parameters (server, port, support_ie)"
+            return False
+        elif data['id'] == "localhost not allowed":
+            print "Error: attempting to localhost or 127.0.0.1 as your server location to the Ad server, but this is not allowed.  Check the 'host' parameter in config.txt and make it a publically accessible hostname/ip."
+            return False
         return data['id']
 
-    def configure_hit(self):
+    def configure_hit(self, ad_id):
 
-        ad_id = self.register_ad()
         # 3. configure question_url based on the id
-        # experimentPortalURL = 'https://psiturk.org/ad/' + data['id'] 
-        experimentPortalURL = 'http://localhost:5004/ad/' + str(ad_id)
+        experimentPortalURL = 'https://psiturk.org/ad/' + str(ad_id) 
+        #experimentPortalURL = 'http://localhost:5004/ad/' + str(ad_id)
         print experimentPortalURL
         frameheight = 600
         mturkQuestion = ExternalQuestion(experimentPortalURL, frameheight)
@@ -174,10 +177,15 @@ class MTurkServices:
     # fail, not error checking here and elsewhere)
     def create_hit(self):
         self.connect_to_turk()
-        self.configure_hit()
-        myhit = self.mtc.create_hit(**self.paramdict)[0]
-        self.hitid = myhit.HITId
-
+        ad_id=self.register_ad()
+        if not ad_id:
+            return False
+        else:
+            self.configure_hit(ad_id)
+            myhit = self.mtc.create_hit(**self.paramdict)[0]
+            self.hitid = myhit.HITId
+            return True
+ 
     # TODO(Jay): Have a wrapper around functions that serializes them. 
     # Default output should not be serialized.
     def expire_hit(self, hitid):
