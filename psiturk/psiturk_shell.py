@@ -199,22 +199,11 @@ class Psiturk_Shell(Cmd):
     def do_create_hit(self, arg):
         """
         Usage: create_hit
-               create_hit <where> <numWorkers> <reward> <duration>
+               create_hit <numWorkers> <reward> <duration>
         """
         interactive = False
-        if arg['<where>'] is None:
+        if arg['<numWorkers>'] is None:
             interactive = True
-            r = raw_input('[' + colorize('s', 'bold') +
-                          ']andbox or [' + colorize('l', bold) 
-                           + ']ive? ')
-            if r == 's':
-                arg['<where>'] = 'sandbox'
-            elif r == 'l':
-                arg['<where>'] = 'live'
-        if arg['<where>'] != 'sandbox' and arg['<where>'] != 'live':
-            print '*** invalid experiment location'
-            return
-        if interactive:
             arg['<numWorkers>'] = raw_input('number of participants? ')
         try:
             int(arg['<numWorkers>'])
@@ -229,7 +218,6 @@ class Psiturk_Shell(Cmd):
             arg['<reward>'] = raw_input('reward per HIT? ')
         p = re.compile('\d*.\d\d')
         m = p.match(arg['<reward>'])
-
         if m is None:
             print '*** reward must have format [dollars].[cents]'
             return
@@ -243,12 +231,6 @@ class Psiturk_Shell(Cmd):
         if int(arg['<duration>']) <= 0:
             print '*** duration must be greater than 0'
             return
-        if arg['<where>'] == 'live':
-            self.config.set('HIT Configuration', 'using_sandbox', False)
-            self.sandbox = False
-        else:
-            self.config.set('HIT Configuration', 'using_sandbox', True)
-            self.sandbox = True
         self.config.set('HIT Configuration', 'max_assignments',
                         arg['<numWorkers>'])
         self.config.set('HIT Configuration', 'reward', arg['<reward>'])
@@ -262,8 +244,13 @@ class Psiturk_Shell(Cmd):
         total = float(arg['<numWorkers>']) * float(arg['<reward>'])
         fee = total / 10
         total = total + fee
+        location = ''
+        if self.sandbox:
+            location = 'sandbox'
+        else:
+            location = 'live'
         print '*****************************'
-        print '  Creating HIT on \'' + arg['<where>'] + '\''
+        print '  Creating %s HIT' % colorize(location, 'bold')
         print '    Max workers: ' + arg['<numWorkers>']
         print '    Reward: $' + arg['<reward>']
         print '    Duration: ' + arg['<duration>'] + ' hours'
@@ -314,9 +301,9 @@ class Psiturk_Shell(Cmd):
         for assignmentID in arg['<assignment_id>']:
             success = self.services.approve_worker(assignmentID)
             if success:
-                print 'approved', arg['<assignment_id>']
+                print 'approved', assignmentID
             else:
-                print '*** failed to approve', arg['<assignment_id>']
+                print '*** failed to approve', assignmentID
 
 
     @docopt_cmd
@@ -324,7 +311,7 @@ class Psiturk_Shell(Cmd):
         """
         Usage: reject_worker (--all | <assignment_id> ...)
 
-        -a, -all           reject all completed workers
+        -a, --all           reject all completed workers
         """
         if arg['--all']:
             workers = self.services.get_workers()
@@ -332,9 +319,9 @@ class Psiturk_Shell(Cmd):
         for assignmentID in arg['<assignment_id>']:
             success = self.services.reject_worker(assignmentID)
             if success:
-                print 'rejected', arg['<assignment_id>']
+                print 'rejected', assignmentID
             else:
-                print  '*** failed to reject', arg['<assignment_id>']
+                print  '*** failed to reject', assignmentID
 
 
     def do_check_balance(self, arg):
@@ -384,8 +371,12 @@ class Psiturk_Shell(Cmd):
 
     def do_quit(self, arg):
         if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe':
-            self.do_stop_server('')
-        exit()
+            r = raw_input("Quitting shell will shut down experiment server. Really quit? y or n: ")
+            if r=='y':
+                self.do_stop_server('')
+            else:
+                return
+        return True
 
 def run():
     opt = docopt(__doc__, sys.argv[1:])
