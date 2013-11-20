@@ -131,7 +131,7 @@ class MTurkServices:
         # 3. configure question_url based on the id
         experimentPortalURL = 'https://psiturk.org/ad/' + str(ad_id) 
         #experimentPortalURL = 'http://localhost:5004/ad/' + str(ad_id)
-        print experimentPortalURL
+        self.config.set('HIT Configuration', 'question_url', experimentPortalURL)
         frameheight = 600
         mturkQuestion = ExternalQuestion(experimentPortalURL, frameheight)
 
