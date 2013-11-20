@@ -370,7 +370,19 @@ class Psiturk_Shell(Cmd):
             self.sandboxHITs -= 1
         else:
             self.liveHITs -= 1
-    
+
+    def do_expire_all_hits(self, arg):
+        """
+        Usage: expire_all_hits
+        """
+        hits_data = self.services.get_active_hits()
+        for hit in hits_data:
+            if self.sandbox:
+                print "expiring sandbox HIT ", hit['hitid']
+            else:
+                print "expiring live HIT ", hit['hitid']
+            self.do_expire_hit(hit['hitid'])
+
     def do_eof(self, arg):
         self.do_quit(arg)
         return True
