@@ -275,13 +275,13 @@ class Psiturk_Shell(Cmd):
         import setup_example as se
         se.setup_example()
 
-    def do_launch_server(self, arg):
+    def do_start_server(self, arg):
         self.server.startup()
         while self.server.is_server_running() != 'yes':
             time.sleep(0.5)
 
 
-    def do_shutdown_server(self, arg):
+    def do_stop_server(self, arg):
         self.server.shutdown()
         print 'Please wait. This could take a few seconds.'
         while self.server.is_server_running() != 'no':
@@ -289,8 +289,8 @@ class Psiturk_Shell(Cmd):
 
 # this doesn't work with the server's slow shutdown right now
     def do_restart_server(self, arg):
-        self.do_shutdown_server('')
-        self.do_launch_server('')
+        self.do_stop_server('')
+        self.do_start_server('')
 
     def do_get_workers(self, arg):
         workers = self.services.get_workers()
@@ -389,7 +389,7 @@ class Psiturk_Shell(Cmd):
 
     def do_quit(self, arg):
         if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe':
-            self.do_shutdown_server('')
+            self.do_stop_server('')
         exit()
 
 def run():
