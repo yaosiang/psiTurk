@@ -370,6 +370,15 @@ class Psiturk_Shell(Cmd):
             self.sandboxHITs -= 1
         else:
             self.liveHITs -= 1
+    
+    def do_eof(self, arg):
+        self.do_quit(arg)
+        return True
+
+    def do_quit(self, arg):
+        if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe':
+            self.do_shutdown_server('')
+        exit()
 
 def run():
     opt = docopt(__doc__, sys.argv[1:])
