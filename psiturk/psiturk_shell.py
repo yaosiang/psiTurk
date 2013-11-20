@@ -89,7 +89,7 @@ class Psiturk_Shell(Cmd):
                                               'using_sandbox')
         self.sandboxHITs = 0
         self.liveHITs = 0
-        self.check_hits()
+        self.tally_hits()
         self.color_prompt()
         self.intro = colorize('psiTurk version ' + version_number + \
                      '\nType "help" for more information.', 'green')
@@ -145,12 +145,12 @@ class Psiturk_Shell(Cmd):
         if arg['<which>']=='live':
             self.sandbox = False
             self.config.set('HIT Configuration', 'using_sandbox', False)
-            self.check_hits()
+            self.tally_hits()
             print 'Entered ' + colorize('live', 'bold') + ' mode'
         else:
             self.sandbox = True
             self.config.set('HIT Configuration', 'using_sandbox', True)
-            self.check_hits()
+            self.tally_hits()
             print 'Entered ' + colorize('sandbox', 'bold') + ' mode'
 
 
@@ -181,13 +181,13 @@ class Psiturk_Shell(Cmd):
             print 'Server: ' + colorize('currently offline', 'red')
         elif server_status == 'maybe':
             print 'Server: ' + colorize('please wait', 'yellow')
-        self.check_hits()
+        self.tally_hits()
         if self.sandbox:
             print 'AMT worker site - ' + colorize('sandbox', 'bold') +  ': ' + str(self.sandboxHITs) + ' HITs available'
         else:
             print 'AMT worker site - ' + colorize('live', 'bold') + ': ' + str(self.liveHITs) + ' HITs available'
 
-    def check_hits(self):
+    def tally_hits(self):
         hits = self.services.get_active_hits()
         if hits:
             if self.sandbox:
@@ -287,7 +287,7 @@ class Psiturk_Shell(Cmd):
         while self.server.is_server_running() != 'no':
             time.sleep(0.5)
 
-# this doesn't work with the server's slow shutdown right now
+    # this doesn't work with the server's slow shutdown right now
     def do_restart_server(self, arg):
         self.do_stop_server('')
         self.do_start_server('')
