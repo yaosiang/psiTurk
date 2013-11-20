@@ -109,13 +109,38 @@ class MTurkServices:
         self.mtc = MTurkConnection(**mturkparams)
         
     def register_ad(self):
-        # register with the ad server (psiturk.org/ad/register?server=&port=&support_ie=)
+        # register with the ad server (psiturk.org/ad/register) using POST
         server = json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']  # use a remote site to determing "public facing ip"
-        port = self.config.get('Server Parameters', 'port')
-        support_ie = self.config.get('HIT Configuration', 'support_ie')
-        ad_server_register_url = 'https://psiturk.org/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
+        port = self.config.get('Server Parameters', 'port') # assumes port mapping is veridical from router to server
+        support_ie = self.config.get('HIT Configuration', 'support_ie') # should we support ie?  
+        if os.path.exists('templates/ad.html') and os.path.exists('templates/error.html'):
+            ad_html = open('templates/ad.html').read()
+            error_html = open('templates/error.html').read()
+        else:
+            print "Error: both ad.html and error.html are required to be in the templates/ folder of your project so that these Ad can be served!"
+            return False
+        # what all do we need to send to server?
+        # 1. server
+        # 2. port 
+        # 3. support_ie?
+        # 4. ad.html template
+        # 5. error.html template
+
+        ad_content = {
+            "server": str(server),
+            "port": str(port),
+            "support_ie": str(support_ie),
+            "ad.html": ad_html,
+            "error.html": error_html
+        }
+
+        #ad_server_register_url = 'http://localhost:5004/ad/register'
+        ad_server_register_url = 'https://psiturk.org/ad/register'
+        req = urllib2.Request(ad_server_register_url)
+        req.add_header('Content-Type', 'application/json')
         #ad_server_register_url = 'http://localhost:5004/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
-        response = urllib2.urlopen(ad_server_register_url)
+        response = urllib2.urlopen(req, json.dumps(ad_content))
+        
         # 2. get id in response
         data = json.load(response) 
         if data['id'] == "correct parameters not provided":
