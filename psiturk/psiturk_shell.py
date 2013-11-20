@@ -304,38 +304,37 @@ class Psiturk_Shell(Cmd):
     def do_approve_worker(self, arg):
         """
         Usage: approve_worker (--all | <assignment_id> ...)
-        Options:
-        --all        approve all completed workers
+
+        -a, --all        approve all completed workers
 
         """
         if arg['--all']:
             workers = self.services.get_workers()
-            for worker in workers:
-                success = self.services.approve_worker(worker['assignmentId'])
-                if success:
-                    print 'approved ' + arg['<assignment_id>']
-                else:
-                    print '*** failed to approve ' + arg['<assignment_id>']
-        else:
-            for assignmentID in arg['<assignment_id>']:
-                success = self.services.approve_worker(assignmentID)
-                if success:
-                    print 'approved ' + arg['<assignment_id>']
-                else:
-                    print '*** failed to approve ' + arg['<assignment_id>']
+            arg['<assignment_id>'] = [worker['assignmentId'] for worker in workers]
+        for assignmentID in arg['<assignment_id>']:
+            success = self.services.approve_worker(assignmentID)
+            if success:
+                print 'approved', arg['<assignment_id>']
+            else:
+                print '*** failed to approve', arg['<assignment_id>']
 
 
     @docopt_cmd
     def do_reject_worker(self, arg):
         """
-        Usage: reject_worker <assignment_id> ...
+        Usage: reject_worker (--all | <assignment_id> ...)
+
+        -a, -all           reject all completed workers
         """
+        if arg['--all']:
+            workers = self.services.get_workers()
+            arg['<assignment_it>'] = [worker['assignmentId'] for worker in workers]
         for assignmentID in arg['<assignment_id>']:
             success = self.services.reject_worker(assignmentID)
             if success:
-                print 'rejected ' + arg['<assignment_id>']
+                print 'rejected', arg['<assignment_id>']
             else:
-                print  '*** failed to reject ' + arg['<assignment_id>']
+                print  '*** failed to reject', arg['<assignment_id>']
 
 
     def do_check_balance(self, arg):
@@ -363,25 +362,21 @@ class Psiturk_Shell(Cmd):
     @docopt_cmd
     def do_expire_hit(self, arg):
         """
-        Usage: expire_hit <HITid>
-        """
-        self.services.expire_hit(arg['<HITid>'])
-        if self.sandbox:
-            self.sandboxHITs -= 1
-        else:
-            self.liveHITs -= 1
+        Usage: expire_hit (--all | <HITid> ...)
 
-    def do_expire_all_hits(self, arg):
+        -a, --all              expire all HITs
         """
-        Usage: expire_all_hits
-        """
-        hits_data = self.services.get_active_hits()
-        for hit in hits_data:
+        if arg['--all']:
+            hits_data = self.services.get_active_hits()
+            arg['<HITid>'] = [hit['hitid'] for hit in hits_data]
+        for hit in arg['<HITid>']:
+            self.services.expire_hit(hit)
             if self.sandbox:
-                print "expiring sandbox HIT ", hit['hitid']
+                print "expiring sandbox HIT", hit
+                self.sandboxHITs -= 1
             else:
-                print "expiring live HIT ", hit['hitid']
-            self.do_expire_hit(hit['hitid'])
+                print "expiring live HIT", hit
+                self.liveHITs -= 1
 
     def do_eof(self, arg):
         self.do_quit(arg)
