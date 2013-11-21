@@ -235,23 +235,28 @@ class Psiturk_Shell(Cmd):
                         arg['<numWorkers>'])
         self.config.set('HIT Configuration', 'reward', arg['<reward>'])
         self.config.set('HIT Configuration', 'duration', arg['<duration>'])
-        if self.services.create_hit():
-            if self.sandbox:
-                self.sandboxHITs += 1
-            else:
-                self.liveHITs += 1
-            #print results
-            total = float(arg['<numWorkers>']) * float(arg['<reward>'])
-            fee = total / 10
-            total = total + fee
-            print '*****************************'
-            print '  Creating HIT on \'' + arg['<where>'] + '\''
-            print '    Max workers: ' + arg['<numWorkers>']
-            print '    Reward: $' + arg['<reward>']
-            print '    Duration: ' + arg['<duration>'] + ' hours'
-            print '    Fee: $%.2f' % fee
-            print '    ________________________'
-            print '    Total: $%.2f' % total
+        self.services.create_hit()
+        if self.sandbox:
+            self.sandboxHITs += 1
+        else:
+            self.liveHITs += 1
+        #print results
+        total = float(arg['<numWorkers>']) * float(arg['<reward>'])
+        fee = total / 10
+        total = total + fee
+        location = ''
+        if self.sandbox:
+            location = 'sandbox'
+        else:
+            location = 'live'
+        print '*****************************'
+        print '  Creating %s HIT' % colorize(location, 'bold')
+        print '    Max workers: ' + arg['<numWorkers>']
+        print '    Reward: $' + arg['<reward>']
+        print '    Duration: ' + arg['<duration>'] + ' hours'
+        print '    Fee: $%.2f' % fee
+        print '    ________________________'
+        print '    Total: $%.2f' % total
 
 
     def do_setup_example(self, arg):
