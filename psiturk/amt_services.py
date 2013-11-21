@@ -129,6 +129,7 @@ class MTurkServices:
         server = json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']  # use a remote site to determing "public facing ip"
         port = self.config.get('Server Parameters', 'port') # assumes port mapping is veridical from router to server
         support_ie = self.config.get('HIT Configuration', 'support_ie') # should we support ie?  
+        hours = self.config.getfloat('HIT Configuration', 'HIT_lifetime')
         if os.path.exists('templates/ad.html') and os.path.exists('templates/error.html'):
             ad_html = open('templates/ad.html').read()
             error_html = open('templates/error.html').read()
@@ -141,16 +142,19 @@ class MTurkServices:
         # 3. support_ie?
         # 4. ad.html template
         # 5. error.html template
+        # 6. lifetime for the ad
         
         ad_content = {
             "server": str(server),
             "port": str(port),
             "support_ie": str(support_ie),
             "ad.html": ad_html,
-            "error.html": error_html
+            "error.html": error_html,
+            "lifetime": str(hours)
         }
 
         ad_server_register_url = 'https://psiturk.org/ad/register'
+        #ad_server_register_url = 'http://0.0.0.0:5004/ad/register'
         req = urllib2.Request(ad_server_register_url)
         req.add_header('Content-Type', 'application/json')
         response = urllib2.urlopen(req, json.dumps(ad_content))
