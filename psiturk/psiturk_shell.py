@@ -360,10 +360,10 @@ class Psiturk_Shell(Cmd):
         for hit in arg['<HITid>']:
             self.services.expire_hit(hit)
             if self.sandbox:
-                print "expiring sandbox HIT", hit
+                print "expiring sandbox HIT/Ad", hit
                 self.sandboxHITs -= 1
             else:
-                print "expiring live HIT", hit
+                print "expiring live HIT/Ad", hit
                 self.liveHITs -= 1
 
     def do_eof(self, arg):

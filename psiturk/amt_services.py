@@ -116,6 +116,14 @@ class MTurkServices:
         else:
             return False
 
+    def expire_ad_link(self, hitId):
+        ad_server_expire_link = 'https://psiturk.org/ad/expire?hitid=' + hitId
+        response = urllib2.urlopen(ad_server_expire_link)
+        if json.load(response)['status']=="we're good!":
+            return True
+        else:
+            return False
+
     def register_ad(self):
         # register with the ad server (psiturk.org/ad/register) using POST
         server = json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']  # use a remote site to determing "public facing ip"
@@ -223,6 +231,7 @@ class MTurkServices:
         self.connect_to_turk()
         self.mtc.expire_hit(hitid)
         # delete hitid from the Ad server
+        self.expire_ad_link(hitid) # just hoping this works for now
 
     def extend_hit(self, hitid, assignments_increment=None, expiration_increment=None):
         self.connect_to_turk()
