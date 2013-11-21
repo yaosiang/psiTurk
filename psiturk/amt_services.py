@@ -107,7 +107,15 @@ class MTurkServices:
             aws_secret_access_key = self.config.get('AWS Access', 'aws_secret_access_key'),
             host=host)
         self.mtc = MTurkConnection(**mturkparams)
-        
+    
+    def update_ad_link(self, adId, hitId):
+        ad_server_update_link = 'https://psiturk.org/ad/' + str(adId) + '/link?hitid=' + hitId
+        response = urllib2.urlopen(ad_server_update_link)
+        if json.load(response)['status']=="we're good!":
+            return True
+        else:
+            return False
+
     def register_ad(self):
         # register with the ad server (psiturk.org/ad/register) using POST
         server = json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']  # use a remote site to determing "public facing ip"
@@ -125,7 +133,7 @@ class MTurkServices:
         # 3. support_ie?
         # 4. ad.html template
         # 5. error.html template
-
+        
         ad_content = {
             "server": str(server),
             "port": str(port),
@@ -134,11 +142,9 @@ class MTurkServices:
             "error.html": error_html
         }
 
-        #ad_server_register_url = 'http://localhost:5004/ad/register'
         ad_server_register_url = 'https://psiturk.org/ad/register'
         req = urllib2.Request(ad_server_register_url)
         req.add_header('Content-Type', 'application/json')
-        #ad_server_register_url = 'http://localhost:5004/ad/register?server=' + server + '&port=' + port + '&support_ie=' + support_ie
         response = urllib2.urlopen(req, json.dumps(ad_content))
         
         # 2. get id in response
@@ -207,6 +213,8 @@ class MTurkServices:
             self.configure_hit(ad_id)
             myhit = self.mtc.create_hit(**self.paramdict)[0]
             self.hitid = myhit.HITId
+            # connect back to ad server to register HIT ID
+            self.update_ad_link(ad_id, self.hitid)  # just hoping this works for now
             return True
  
     # TODO(Jay): Have a wrapper around functions that serializes them. 
@@ -214,11 +222,13 @@ class MTurkServices:
     def expire_hit(self, hitid):
         self.connect_to_turk()
         self.mtc.expire_hit(hitid)
+        # delete hitid from the Ad server
 
     def extend_hit(self, hitid, assignments_increment=None, expiration_increment=None):
         self.connect_to_turk()
         self.mtc.extend_hit(hitid, assignments_increment=int(assignments_increment))
         self.mtc.extend_hit(hitid, expiration_increment=int(expiration_increment)*60)
+        # extend hit on the ad server
 
     def get_summary(self):
       try:
