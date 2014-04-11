@@ -17,9 +17,9 @@ class Participant(Base):
     Object representation of a participant in the database.
     """
     __tablename__ = TABLENAME
-    
-    uniqueid = Column(String(128), primary_key=True)
-    assignmentid = Column(String(128), nullable=False)
+   
+    uniqueid =Column(String(128), primary_key=True)
+    assignmentid =Column(String(128), nullable=False)
     workerid = Column(String(128), nullable=False)
     hitid = Column(String(128), nullable=False)
     ipaddress = Column(String(128))
@@ -57,7 +57,7 @@ class Participant(Base):
         except:
             # There was no data to return.
             print("No trial data found in record:", self)
-            return ""
+            return("")
 
         try:
             ret = []
@@ -72,8 +72,8 @@ class Participant(Base):
                 ret = outstring.getvalue()
             return ret
         except:
-            print ("Error reading record:", self)
-            return ""
+            print("Error reading record:", self)
+            return("")
     
     def get_event_data(self):
         try:
@@ -81,7 +81,7 @@ class Participant(Base):
         except ValueError:
             # There was no data to return.
             print("No event data found in record:", self)
-            return ""
+            return("")
         
         try:
             ret = []
@@ -93,7 +93,7 @@ class Participant(Base):
             return ret
         except:
             print("Error reading record:", self)
-            return ""
+            return("")
     
     def get_question_data(self):
         try:
@@ -101,7 +101,7 @@ class Participant(Base):
         except ValueError:
             # There was no data to return.
             print("No question data found in record:", self)
-            return ""
+            return("")
         
         try:
             ret = []
@@ -113,5 +113,5 @@ class Participant(Base):
             return ret
         except:
             print("Error reading record:", self)
-            return ""
+            return("")
 

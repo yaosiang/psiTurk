@@ -7,18 +7,18 @@ def process():
 	# figure out how we were invoked
 	invoked_as = os.path.basename(sys.argv[0])
 
-	if invoked_as == "psiturk":
-        launch_shell()
-	elif invoked_as == "psiturk-server":
-        launch_server()
-	elif invoked_as == "psiturk-shell":
-        launch_shell()
-	elif invoked_as == "psiturk-setup-example":
-        setup_example()
+	if (invoked_as == "psiturk"):
+		launch_shell()
+	elif (invoked_as == "psiturk-server"):
+		launch_server()
+	elif (invoked_as == "psiturk-shell"):
+		launch_shell()
+	elif (invoked_as == "psiturk-setup-example"):
+		setup_example()
 
 def setup_example():
 	# add commands for testing, etc..
-    parser = argparse.ArgumentParser(description='Creates a simple default project (stroop) in the current directory with the necessary psiTurk files.')
+	parser = argparse.ArgumentParser(description='Creates a simple default project (stroop) in the current directory with the necessary psiTurk files.')
 
 	# optional flags
 	parser.add_argument('-v', '--version', help='Print version number.', action="store_true")
