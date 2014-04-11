@@ -18,7 +18,7 @@ class PsiturkOrgServices:
     def __init__(self, key, secret):
         self.apiServer = 'https://api.psiturk.org' # 'https://api.psiturk.org' # by default for now
         self.adServer = 'https://ad.psiturk.org'
-        self.update_credentials(key,secret)
+        self.update_credentials(key, secret)
         if not self.check_credentials():
             print 'WARNING *****************************'
             print 'Sorry, psiTurk Credentials invalid.\nYou will only be able to '\
@@ -27,7 +27,7 @@ class PsiturkOrgServices:
                   + 'credentials at https://www.psiturk.org/login.\n'
 
     def check_credentials(self):
-        r = requests.get(self.apiServer + '/api/ad', auth=(self.access_key,self.secret_key))
+        r = requests.get(self.apiServer + '/api/ad', auth=(self.access_key, self.secret_key))
         if r.status_code in [401, 403, 500]:  # not sure 500 server error should be included here
             return False
         else:
@@ -52,12 +52,12 @@ class PsiturkOrgServices:
         """
         try:
             api_server_status_link = self.apiServer + '/status_msg?version=' + version_number
-            response=urllib2.urlopen(api_server_status_link,timeout=1)
+            response=urllib2.urlopen(api_server_status_link, timeout=1)
             status_msg = json.load(response)['status']
         except:
             status_msg = "Sorry, can't connect to psiturk.org, please check your internet connection.\nYou will not be able to create new hits, but testing locally should work.\n"
         return status_msg
-        
+    
     def get_my_ip(self):
         """
             get_my_ip:
@@ -69,25 +69,24 @@ class PsiturkOrgServices:
         return json.load(urllib2.urlopen('http://httpbin.org/ip'))['origin']
 
     def create_record(self, name, content, username, password):
-        #headers = {'key': username, 'secret': password}
-        r = requests.post(self.apiServer + '/api/' + name, data=json.dumps(content), auth=(username,password))
+        # headers = {'key': username, 'secret': password}
+        r = requests.post(self.apiServer + '/api/' + name, data=json.dumps(content), auth=(username, password))
         return r
 
     def update_record(self, name, recordid, content, username, password):
-        #headers = {'key': username, 'secret': password}
-        r = requests.put(self.apiServer + '/api/' + name + '/' + str(recordid), data=json.dumps(content), auth=(username,password))
+        # headers = {'key': username, 'secret': password}
+        r = requests.put(self.apiServer + '/api/' + name + '/' + str(recordid), data=json.dumps(content), auth=(username, password))
         return r
 
     def delete_record(self, name, recordid, username, password):
-        #headers = {'key': username, 'secret': password}
-        r = requests.delete(self.apiServer + '/api/' + name + '/' + str(recordid), auth=(username,password))
+        # headers = {'key': username, 'secret': password}
+        r = requests.delete(self.apiServer + '/api/' + name + '/' + str(recordid), auth=(username, password))
         return r
 
     def query_records(self, name, username, password, query=''):
-        #headers = {'key': username, 'secret': password}
-        r = requests.get(self.apiServer + '/api/' + name + "/" + query, auth=(username,password))
+        # headers = {'key': username, 'secret': password}
+        r = requests.get(self.apiServer + '/api/' + name + "/" + query, auth=(username, password))
         return r
-
 
     def get_ad_url(self, adId):
         """
@@ -101,7 +100,7 @@ class PsiturkOrgServices:
             get_ad_hitid:
             updates the ad with the corresponding hitid
         """
-        r = self.update_record('ad', adId, {'amt_hit_id':hitId}, self.access_key, self.secret_key)
+        r = self.update_record('ad', adId, {'amt_hit_id': hitId}, self.access_key, self.secret_key)
         if r.status_code == 201:
             return True
         else:

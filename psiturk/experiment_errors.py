@@ -1,6 +1,6 @@
-#----------------------------------------------
+# ----------------------------------------------
 # ExperimentError Exception, for db errors, etc.
-#----------------------------------------------
+# ----------------------------------------------
 # Possible ExperimentError values.
 
 from flask import render_template
