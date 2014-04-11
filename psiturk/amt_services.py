@@ -493,10 +493,10 @@ class MTurkServices:
         return hitdata[0].HITStatus
 
     def get_summary(self):
-        try:
-            balance = self.check_balance()
-            summary = jsonify(balance=str(balance))
-            return summary
-        except MTurkRequestError as e:
-            print e.error_message
-            return False
+      try:
+          balance = self.check_balance()
+          summary = jsonify(balance=str(balance))
+          return summary
+      except MTurkRequestError as e:
+          print e.error_message
+          return False

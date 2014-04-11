@@ -136,8 +136,8 @@ def get_random_condcount():
     mincount = min(counts.values())
     minima = [hsh for hsh, count in counts.iteritems() if count == mincount]
     chosen = choice(minima)
-    # conds += [ 0 for _ in range(1000) ]
-    # conds += [ 1 for _ in range(1000) ]
+    #conds += [ 0 for _ in range(1000) ]
+    #conds += [ 1 for _ in range(1000) ]
     app.logger.info("given %(a)s chose %(b)s" % {'a': counts, 'b': chosen})
 
     return chosen
@@ -383,7 +383,7 @@ def enterexp():
     referesh to start over).
     """
     app.logger.info ("Accessing /inexp")
-    if 'uniqueId' not in request.form:
+    if not 'uniqueId' in request.form:
         raise ExperimentError('improper_inputs')
     uniqueId = request.form['uniqueId']
 
@@ -483,7 +483,7 @@ def debug_complete():
 
 @app.route('/worker_complete', methods=['GET'])
 def worker_complete():
-    if 'uniqueId' not in request.args:
+    if not 'uniqueId' in request.args:
         resp = {"status": "bad request"}
         return jsonify(**resp)
     else:

@@ -541,12 +541,12 @@ class PsiturkNetworkShell(PsiturkShell):
         while not reason:
             r = raw_input("Type the reason for the bonus. Workers will see this message: ")
             reason = r
-        # bonus already-bonused workers if the user explicitly lists their worker IDs
+        #bonus already-bonused workers if the user explicitly lists their worker IDs
         overrideStatus = True
         if chosenHit:
             overrideStatus = False
             workers = self.amt_services.get_workers("Approved")
-            if not workers:
+            if not workers
                 print "No approved workers for HIT", chosenHit
                 return
             assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
@@ -636,7 +636,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 return
             else:
                 success = self.amt_services.dispose_hit(hit)
-                # self.web_services.delete_ad(hit)  # also delete the ad
+                #self.web_services.delete_ad(hit)  # also delete the ad
                 if success:
                     if self.sandbox:
                         print "deleting sandbox HIT", hit
@@ -786,7 +786,7 @@ class PsiturkNetworkShell(PsiturkShell):
         create_failed = False
         fail_msg = None
         ad_id = self.web_services.create_ad(ad_content)
-        if ad_id:
+        if ad_id != False:
             ad_url = self.web_services.get_ad_url(ad_id)
             hit_config = {
                 "ad_location": ad_url,
@@ -801,7 +801,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 "duration": datetime.timedelta(hours=int(duration))
             }
             hit_id = self.amt_services.create_hit(hit_config)
-            if hit_id:
+            if hit_id != False:
                 if not self.web_services.set_ad_hitid(ad_id, hit_id):
                     create_failed = True
                     fail_msg = "  Unable to update Ad on http://ad.psiturk.org to point at HIT."
@@ -963,7 +963,7 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 instance_id = raw_input('Enter the instance identity you would like to delete: ')
                 res = self.db_services.validate_instance_id(instance_id)
-                if res:
+                if (res == True):
                     valid = True
                 else:
                     print res + " Try again, instance name not valid.  Check for typos."
@@ -1039,7 +1039,7 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 password = raw_input('enter the master password for this instance: ')
                 res = self.db_services.validate_instance_password(password)
-                if not res:
+                if res != True:
                     print "*** Error: password seems incorrect, doesn't conform to AWS rules.  Try again"
                 else:
                     valid = True
@@ -1070,7 +1070,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     while not valid:
                         db_name = raw_input("No existing DBs in this instance.  Enter a new name to create one: ")
                         res = self.db_services.validate_instance_dbname(db_name)
-                        if res:
+                        if res == True:
                             valid = True
                         else:
                             print res + " Try again."
@@ -1083,7 +1083,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     while not valid:
                         db_name = raw_input("Enter the name of the database you want to use or a new name to create a new one: ")
                         res = self.db_services.validate_instance_dbname(db_name)
-                        if res:
+                        if res == True:
                             valid = True
                         else:
                             print res + " Try again."
@@ -1161,7 +1161,7 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 size = raw_input('size of db in GB (5-1024): ')
                 res = self.db_services.validate_instance_size(size)
-                if res:
+                if res == True:
                     valid = True
                 else:
                     print res + " Try again."
