@@ -69,8 +69,8 @@ def docopt_cmd(func):
         except DocoptExit as e:
             # The DocoptExit is thrown when the args do not match.
             # We print a message to the user and the usage block.
-            print('Invalid Command!')
-            print(e)
+            print 'Invalid Command!'
+            print e
             return
         except SystemExit:
             # The SystemExit exception prints the usage for --help
@@ -83,12 +83,12 @@ def docopt_cmd(func):
     return fn
 
 
-#---------------------------------
+# ---------------------------------
 # psiturk shell class
 #  -  all commands contained in methods titled do_XXXXX(self, arg)
 #  -  if a command takes any arguments, use @docopt_cmd decorator
 #     and describe command usage in docstring
-#---------------------------------
+# ---------------------------------
 class PsiturkShell(Cmd, object):
     """
     Usage:
@@ -112,9 +112,9 @@ class PsiturkShell(Cmd, object):
         self.intro = self.get_intro_prompt()
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  basic command line functions
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def check_offline_configuration(self):
         quit_on_start = False
         database_url = self.config.get('Database Parameters', 'database_url')
@@ -159,7 +159,7 @@ class PsiturkShell(Cmd, object):
         open('.psiturk_history', 'a').close()
         readline.read_history_file('.psiturk_history')
         for i in range(readline.get_current_history_length()):
-            if readline.get_history_item(i) != None:
+            if readline.get_history_item(i) is not None:
                 self.history.append(readline.get_history_item(i))
         Cmd.preloop(self)
 
@@ -185,18 +185,18 @@ class PsiturkShell(Cmd, object):
         return Cmd.complete(self, text, state) + ' '
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  server management
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def server_on(self):
         self.server.startup()
-        while self.server.is_server_running() != 'yes':
+        while self.server.is_server_running() is not 'yes':
             time.sleep(0.5)
 
     def server_off(self):
         self.server.shutdown()
         print 'Please wait. This could take a few seconds.'
-        while self.server.is_server_running() != 'no':
+        while self.server.is_server_running() is not 'no':
             time.sleep(0.5)
 
     def server_restart(self):
@@ -219,7 +219,7 @@ class PsiturkShell(Cmd, object):
 
         -p, --print-only         just provides the URL, doesn't attempt to launch browser
         """
-        if self.server.is_server_running() == 'no' or self.server.is_server_running()=='maybe':
+        if self.server.is_server_running() == 'no' or self.server.is_server_running() == 'maybe':
             print "Error: Sorry, you need to have the server running to debug your experiment.  Try 'server on' first."
             return
 
@@ -275,10 +275,9 @@ class PsiturkShell(Cmd, object):
         import setup_example as se
         se.setup_example()
 
-
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  Local SQL database commands
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def db_get_config(self):
         print "Current database setting (database_url): \n\t", self.config.get("Database Parameters", "database_url")
 
@@ -287,8 +286,8 @@ class PsiturkShell(Cmd, object):
         if filename is None:
             interactive = True
             filename = raw_input('Enter the filename of the local SQLLite database you would like to use [default=participants.db]: ')
-            if filename=='':
-                filename='participants.db'
+            if filename == '':
+                filename = 'participants.db'
         base_url = "sqlite:///" + filename
         self.config.set("Database Parameters", "database_url", base_url)
         print "Updated database setting (database_url): \n\t", self.config.get("Database Parameters", "database_url")
@@ -315,7 +314,7 @@ class PsiturkShell(Cmd, object):
         if arg['<folder>'] is None:
             subprocess.call(["open"])
         else:
-            subprocess.call(["open",arg['<folder>']])
+            subprocess.call(["open", arg['<folder>']])
 
     def do_eof(self, arg):
         self.do_quit(arg)
@@ -358,7 +357,7 @@ class PsiturkShell(Cmd, object):
     server_commands = ('on', 'off', 'restart', 'log', 'help')
 
     def complete_server(self, text, line, begidx, endidx):
-        return  [i for i in PsiturkShell.server_commands if i.startswith(text)]
+        return [i for i in PsiturkShell.server_commands if i.startswith(text)]
 
     def help_server(self):
         with open(self.helpPath + 'server.txt', 'r') as helpText:
@@ -437,9 +436,9 @@ class PsiturkNetworkShell(PsiturkShell):
 
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  basic command line functions
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def get_intro_prompt(self):  # overloads intro prompt with network-aware version
         # if you can reach psiTurk.org, request system status
         # message
@@ -469,7 +468,7 @@ class PsiturkNetworkShell(PsiturkShell):
         prompt += ']$ '
         self.prompt = prompt
 
-    def do_status(self, arg): # overloads do_status with AMT info
+    def do_status(self, arg):  # overloads do_status with AMT info
         super(PsiturkNetworkShell, self).do_status(arg)
         server_status = self.server.is_server_running()
         self.tally_hits()
@@ -479,9 +478,9 @@ class PsiturkNetworkShell(PsiturkShell):
             print 'AMT worker site - ' + colorize('live', 'bold') + ': ' + str(self.liveHITs) + ' HITs available'
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  worker management
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def worker_list(self, submitted, approved, rejected, allWorkers, chosenHit):
         workers = None
         if submitted:
@@ -492,10 +491,10 @@ class PsiturkNetworkShell(PsiturkShell):
             workers = self.amt_services.get_workers("Rejected")
         else:
             workers = self.amt_services.get_workers()
-        if workers==False:
+        if not workers:
             print colorize('*** failed to get workers', 'red')
         if chosenHit:
-            workers = [worker for worker in workers if worker['hitId']==chosenHit]
+            workers = [worker for worker in workers if worker['hitId'] == chosenHit]
             print 'listing workers for HIT', chosenHit
         if not len(workers):
             print "*** no workers match your request"
@@ -506,7 +505,7 @@ class PsiturkNetworkShell(PsiturkShell):
     def worker_approve(self, chosenHit, assignment_ids = None):
         if chosenHit:
             workers = self.amt_services.get_workers("Submitted")
-            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId']==chosenHit]
+            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
             print 'approving workers for HIT', chosenHit
         for assignmentID in assignment_ids:
             success = self.amt_services.approve_worker(assignmentID)
@@ -518,8 +517,8 @@ class PsiturkNetworkShell(PsiturkShell):
     def worker_reject(self, chosenHit, assignment_ids = None):
         if chosenHit:
             workers = self.amt_services.get_workers("Submitted")
-            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId']==chosenHit]
-            print 'rejecting workers for HIT',chosenHit
+            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
+            print 'rejecting workers for HIT', chosenHit
         for assignmentID in assignment_ids:
             success = self.amt_services.reject_worker(assignmentID)
             if success:
@@ -547,10 +546,10 @@ class PsiturkNetworkShell(PsiturkShell):
         if chosenHit:
             overrideStatus = False
             workers = self.amt_services.get_workers("Approved")
-            if workers==False:
+            if not workers
                 print "No approved workers for HIT", chosenHit
                 return
-            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId']==chosenHit]
+            assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
             print 'bonusing workers for HIT', chosenHit
         for assignmentID in assignment_ids:
             try:
@@ -561,9 +560,9 @@ class PsiturkNetworkShell(PsiturkShell):
                 if auto:
                     amount = part.bonus
                 status = part.status
-                if amount<=0:
+                if amount <= 0:
                     print "bonus amount <=$0, no bonus given to", assignmentID
-                elif status==6 and not overrideStatus:
+                elif status == 6 and not overrideStatus:
                     print "bonus already awarded to ", assignmentID
                 else:
                     success = self.amt_services.bonus_worker(assignmentID, amount, reason)
@@ -578,9 +577,9 @@ class PsiturkNetworkShell(PsiturkShell):
             except:
                 print "*** failed to bonus", assignmentID
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  hit management
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def do_amt_balance(self, arg):
         print self.amt_services.check_balance()
     def help_amt_balance(self):
@@ -632,7 +631,7 @@ class PsiturkNetworkShell(PsiturkShell):
             if not status:
                 print "*** Error getting hit status"
                 return
-            if self.amt_services.get_hit_status(hit)!="Reviewable":
+            if self.amt_services.get_hit_status(hit) != "Reviewable":
                 print "*** This hit is not 'Reviewable' and so can not be disposed of"
                 return
             else:
@@ -684,7 +683,7 @@ class PsiturkNetworkShell(PsiturkShell):
 
             r = raw_input('\n'.join(['  If you are using an external server process, press `y` to continue.',
                                      '  Otherwise, press `n` to cancel:']))
-            if r!='y':
+            if r != 'y':
                 return
 
         if not self.web_services.check_credentials():
@@ -713,7 +712,7 @@ class PsiturkNetworkShell(PsiturkShell):
                              ''])
             r = raw_input('\n'.join(['  If you are using an external server process, press `y` to continue.',
                                       '  Otherwise, press `n` to cancel:']))
-            if r!='y':
+            if r != 'y':
                 return
 
         interactive = False
@@ -824,7 +823,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 self.sandboxHITs += 1
             else:
                 self.liveHITs += 1
-            #print results
+            # print results
             total = float(numWorkers) * float(reward)
             fee = total / 10
             total = total + fee
@@ -844,7 +843,6 @@ class PsiturkNetworkShell(PsiturkShell):
                              '    Total: $%.2f' % total])
             print('  Ad for this HIT now hosted at: https://ad.psiturk.org/view/%s?assignmentId=debug%s&hitId=debug%s'
                   % (str(ad_id), str(self.random_id_generator()), str(self.random_id_generator())))
-
 
 
     @docopt_cmd
@@ -894,9 +892,9 @@ class PsiturkNetworkShell(PsiturkShell):
             print helpText.read()
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  AWS RDS commands
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     def db_aws_list_regions(self):
         regions = self.db_services.list_regions()
         if regions != []:
@@ -925,7 +923,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 else:
                     print "*** The region name (%s) you entered is not allowed, please choose from the list printed above (use type 'db aws_list_regions'." % region_name
                     region_name = raw_input('Enter the name of the region you would like to use: ')
-                tries+=1
+                tries += 1
                 if tries > 5:
                     print "*** Error, region you are requesting not available.  No changes made to regions."
                     return
@@ -956,7 +954,7 @@ class PsiturkNetworkShell(PsiturkShell):
 
         if interactive:
             valid = False
-            if len(instances)==0:
+            if len(instances) == 0:
                 print "There are no instances you can delete currently.  Use `db aws_create_instance` to make one."
                 return
             print "Here are the available instances you can delete:"
@@ -976,7 +974,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     print "Try again, instance not present in this account.  Try again checking for typos."
         else:
             res = self.db_services.validate_instance_id(instance_id)
-            if (res != True):
+            if not res:
                 print "*** Error, instance name either not valid.  Try again checking for typos."
                 return
             if instance_id not in instance_list:
@@ -1003,7 +1001,7 @@ class PsiturkNetworkShell(PsiturkShell):
         instances = self.db_services.get_db_instances()
         instance_list = [dbinst.id for dbinst in instances]
 
-        if len(instances)==0:
+        if len(instances) == 0:
             print "There are no instances in this region/account.  Use `db aws_create_instance` to make one first."
             return
 
@@ -1016,7 +1014,7 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 instance_id = raw_input('Enter the instance identity you would like to use: ')
                 res = self.db_services.validate_instance_id(instance_id)
-                if (res == True):
+                if res:
                     valid = True
                 else:
                     print res + " Try again, instance name not valid.  Check for typos."
@@ -1027,7 +1025,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     print "Try again, instance not present in this account.  Try again checking for typos."
         else:
             res = self.db_services.validate_instance_id(instance_id)
-            if (res != True):
+            if not res:
                 print "*** Error, instance name either not valid.  Try again checking for typos."
                 return
             if instance_id not in instance_list:
@@ -1066,8 +1064,8 @@ class PsiturkNetworkShell(PsiturkShell):
                     print "***  Error connecting to instance.  Your password my be incorrect."
                     return
                 existing_dbs = [db[0] for db in db_names if db not in [('information_schema',), ('innodb',), ('mysql',), ('performance_schema',)]]
-                create_db=False
-                if len(existing_dbs)==0:
+                create_db = False
+                if len(existing_dbs) == 0:
                     valid = False
                     while not valid:
                         db_name = raw_input("No existing DBs in this instance.  Enter a new name to create one: ")
@@ -1090,17 +1088,17 @@ class PsiturkNetworkShell(PsiturkShell):
                         else:
                             print res + " Try again."
                     if db_name not in existing_dbs:
-                        create_db=True
+                        create_db = True
                 if create_db:
                     try:
                         connection.execute("CREATE DATABASE %s;" % db_name)
                     except:
-                        print "*** Error creating database %s on instance %s" % (db_name,instance_id)
+                        print "*** Error creating database %s on instance %s" % (db_name, instance_id)
                         return
                 base_url = 'mysql://' + myinstance.master_username + ":" + password + "@" + myinstance.endpoint[0] + ":" + str(myinstance.endpoint[1]) + "/" + db_name
                 self.config.set("Database Parameters", "database_url", base_url)
                 print "Successfully set your current database (database_url) to \n\t%s" % base_url
-                if self.server.is_server_running()=='maybe' or self.server.is_server_running()=='yes':
+                if self.server.is_server_running() == 'maybe' or self.server.is_server_running() == 'yes':
                     self.do_restart_server('')
             else:
                 print '\n'.join(["*** Error selecting database instance %s." % arg['<id>'],
@@ -1148,13 +1146,13 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 instid = raw_input('enter an identifier for the instance (see rules above): ')
                 res = self.db_services.validate_instance_id(instid)
-                if res == True:
+                if res:
                     valid = True
                 else:
                     print res + " Try again."
         else:
             res = self.db_services.validate_instance_id(instid)
-            if res is not True:
+            if not res:
                 print res
                 return
 
@@ -1169,7 +1167,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     print res + " Try again."
         else:
             res = self.db_services.validate_instance_size(size)
-            if res is not True:
+            if not res:
                 print res
                 return
 
@@ -1178,13 +1176,13 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 username = raw_input('master username (see rules above): ')
                 res = self.db_services.validate_instance_username(username)
-                if res == True:
+                if res:
                     valid = True
                 else:
                     print res + " Try again."
         else:
             res = self.db_services.validate_instance_username(username)
-            if res is not True:
+            if not res:
                 print res
                 return
 
@@ -1193,13 +1191,13 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 password = raw_input('master password (see rules above): ')
                 res = self.db_services.validate_instance_password(password)
-                if res == True:
+                if res:
                     valid = True
                 else:
                     print res + " Try again."
         else:
             res = self.db_services.validate_instance_password(password)
-            if res is not True:
+            if not res:
                 print res
                 return
 
@@ -1208,13 +1206,13 @@ class PsiturkNetworkShell(PsiturkShell):
             while not valid:
                 dbname = raw_input('name for first database on this instance (see rules): ')
                 res = self.db_services.validate_instance_dbname(dbname)
-                if res == True:
+                if res:
                     valid = True
                 else:
                     print res + " Try again."
         else:
             res = self.db_services.validate_instance_dbname(dbname)
-            if res is not True:
+            if not res:
                 print res
                 return
 
@@ -1245,9 +1243,9 @@ class PsiturkNetworkShell(PsiturkShell):
                              ' will say \'available\' when it is ready'])
 
 
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     #  Basic shell commands
-    #+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
+    # +-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.+-+.
     @docopt_cmd
     def do_mode(self, arg):
         """
@@ -1407,7 +1405,7 @@ def run(cabinmode=False, script=None):
                                    'Note: "pip install readline" will NOT work because of how the OSX',
                                    'pythonpath is structured.']), 'red', False)
     sys.argv = [sys.argv[0]] # drop arguments which were already processed in command_line.py
-    #opt = docopt(__doc__, sys.argv[1:])
+    # opt = docopt(__doc__, sys.argv[1:])
     config = PsiturkConfig()
     config.load_config()
     server = control.ExperimentServerController(config)
