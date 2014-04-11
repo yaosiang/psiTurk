@@ -1,5 +1,5 @@
 import os, sys
-import subprocess,signal
+import subprocess, signal
 from threading import Thread, Event
 import urllib2
 import string
@@ -76,7 +76,7 @@ class RDSServices:
             try:
                 self.rdsc.get_all_dbinstances()
             except MTurkRequestError as e:
-                print(e.error_message)
+                print e.error_message
                 return False
             except AttributeError:
                 print "*** Unable to establish connection to AWS region %s using your access key/secret key", self.region
@@ -161,7 +161,7 @@ class RDSServices:
     def validate_instance_id(self, instid):
         # 1-63 alphanumeric characters, first must be a letter.
         if re.match('[\w-]+$', instid) is not None:
-            if len(instid) <=63 and len(instid)>=1:
+            if len(instid) <= 63 and len(instid) >= 1:
                 if instid[0].isalpha():
                     return True
         return "*** Error: Instance ids must be 1-63 alphanumeric characters, first is a letter."
@@ -179,7 +179,7 @@ class RDSServices:
     def validate_instance_username(self, username):
         # 1-16 alphanumeric characters - first character must be a letter - cannot be a reserved MySQL word
         if re.match('[\w-]+$', username) is not None:
-            if len(username) <=16 and len(username)>=1:
+            if len(username) <= 16 and len(username) >= 1:
                 if username[0].isalpha():
                     if username not in MYSQL_RESERVED_WORDS:
                         return True
@@ -188,14 +188,14 @@ class RDSServices:
     def validate_instance_password(self, password):
         # 1-16 alphanumeric characters - first character must be a letter - cannot be a reserved MySQL word
         if re.match('[\w-]+$', password) is not None:
-            if len(password) <=41 and len(password)>=8:
+            if len(password) <= 41 and len(password)>= 8:
                 return True
         return '*** Error: Passwords must be 8-41 alphanumeric characters'
 
     def validate_instance_dbname(self, dbname):
         # 1-64 alphanumeric characters, cannot be a reserved MySQL word
         if re.match('[\w-]+$', dbname) is not None:
-            if len(dbname) <=41 and len(dbname)>=1:
+            if len(dbname) <= 41 and len(dbname)>= 1:
                 if dbname.lower() not in MYSQL_RESERVED_WORDS:
                     return True
         return '*** Error: Database names must be 1-64 alphanumeric characters, cannot be a reserved MySQL word.'
@@ -218,7 +218,6 @@ class RDSServices:
             return False
         else:
             return True
-
 
 
 class MTurkServices:
@@ -246,7 +245,7 @@ class MTurkServices:
             hits = self.mtc.get_all_hits()
         except MTurkRequestError:
             return False
-        reviewable_hits = [hit for hit in hits if (hit.HITStatus == "Reviewable" or hit.HITStatus == "Reviewing")]
+        reviewable_hits = [hit for hit in hits if hit.HITStatus == "Reviewable" or hit.HITStatus == "Reviewing"]
         hits_data = [MTurkHIT({'hitid': hit.HITId,
                       'title': hit.Title,
                       'status': hit.HITStatus,
@@ -257,7 +256,7 @@ class MTurkServices:
                       'creation_time': hit.CreationTime,
                       'expiration': hit.Expiration,
                       }) for hit in reviewable_hits]
-        return(hits_data)
+        return hits_data
 
     def get_all_hits(self):
         if not self.connect_to_turk():
@@ -276,7 +275,7 @@ class MTurkServices:
                       'creation_time': hit.CreationTime,
                       'expiration': hit.Expiration,
                       }) for hit in hits]
-        return(hits_data)
+        return hits_data
 
     def get_active_hits(self):
         if not self.connect_to_turk():
@@ -286,7 +285,7 @@ class MTurkServices:
             hits = self.mtc.get_all_hits()
         except MTurkRequestError:
             return False
-        active_hits = [hit for hit in hits if not(hit.expired)]
+        active_hits = [hit for hit in hits if not hit.expired]
         hits_data = [MTurkHIT({'hitid': hit.HITId,
                       'title': hit.Title,
                       'status': hit.HITStatus,
@@ -297,7 +296,7 @@ class MTurkServices:
                       'creation_time': hit.CreationTime,
                       'expiration': hit.Expiration,
                       }) for hit in active_hits]
-        return(hits_data)
+        return hits_data
 
     def get_workers(self, assignmentStatus = None):
         if not self.connect_to_turk():
@@ -314,7 +313,7 @@ class MTurkServices:
 
             workers = [val for subl in workers_nested for val in subl]  # Flatten nested lists
         except MTurkRequestError:
-            return(False)
+            return False
         worker_data = [{'hitId': worker.HITId,
                         'assignmentId': worker.AssignmentId,
                         'workerId': worker.WorkerId,
@@ -322,7 +321,7 @@ class MTurkServices:
                         'accept_time': worker.AcceptTime,
                         'status': worker.AssignmentStatus
                        } for worker in workers]
-        return(worker_data)
+        return worker_data
 
 
     def bonus_worker(self, assignment_id, amount, reason=""):
@@ -341,12 +340,12 @@ class MTurkServices:
 
     def approve_worker(self, assignment_id):
         if not self.connect_to_turk():
-            return(False)
+            return False
         try:
             self.mtc.approve_assignment(assignment_id, feedback=None)
             return True
         except MTurkRequestError:
-            return(False)
+            return False
 
     def reject_worker(self, assignment_id):
         if not self.connect_to_turk():
@@ -355,7 +354,7 @@ class MTurkServices:
             self.mtc.reject_assignment(assignment_id, feedback=None)
             return True
         except MTurkRequestError:
-            return(False)
+            return False
 
     def unreject_worker(self, assignment_id):
         if not self.connect_to_turk():
@@ -379,7 +378,7 @@ class MTurkServices:
             try:
                 self.mtc.get_account_balance()
             except MTurkRequestError as e:
-                print(e.error_message)
+                print e.error_message
                 return False
             else:
                 return True
@@ -436,8 +435,8 @@ class MTurkServices:
 
     def check_balance(self):
         if not self.connect_to_turk():
-            return('-')
-        return(self.mtc.get_account_balance()[0])
+            return '-'
+        return self.mtc.get_account_balance()[0]
 
     # TODO (if valid AWS credentials haven't been provided then connect_to_turk() will
     # fail, not error checking here and elsewhere)
@@ -497,7 +496,7 @@ class MTurkServices:
       try:
           balance = self.check_balance()
           summary = jsonify(balance=str(balance))
-          return(summary)
+          return summary
       except MTurkRequestError as e:
-          print(e.error_message)
-          return(False)
+          print e.error_message
+          return False

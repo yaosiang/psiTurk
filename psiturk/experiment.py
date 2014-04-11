@@ -32,7 +32,7 @@ logfilepath = os.path.join(os.getcwd(),
 
 loglevels = [logging.DEBUG, logging.INFO, logging.WARNING, logging.ERROR, logging.CRITICAL]
 loglevel = loglevels[config.getint('Server Parameters', 'loglevel')]
-logging.basicConfig( filename=logfilepath, format='%(asctime)s %(message)s', level=loglevel )
+logging.basicConfig(filename=logfilepath, format='%(asctime)s %(message)s', level=loglevel)
 
 
 # Status codes
@@ -59,23 +59,24 @@ try:
     sys.path.append(os.getcwd())
     from custom import custom_code
 except ImportError:
-    app.logger.info( "Hmm... it seems no custom code (custom.py) assocated with this project.")
+    app.logger.info("Hmm... it seems no custom code (custom.py) assocated with this project.")
 else:
     app.register_blueprint(custom_code)
 
 # read psiturk.js file into memory 
 psiturk_js_file = os.path.join(os.path.dirname(__file__), "psiturk_js/psiturk.js")
-app.logger.error( psiturk_js_file )
+app.logger.error(psiturk_js_file)
 
 if os.path.exists(psiturk_js_file):
     psiturk_js_code = open(psiturk_js_file).read()
 else:
     psiturk_js_code = "alert('psiturk.js file not found!');"
 
-#----------------------------------------------
+# ----------------------------------------------
 # favicon
-#----------------------------------------------
+# ----------------------------------------------
 @app.route('/favicon.ico')
+
 def favicon():
     """
     Serving a favicon
@@ -83,24 +84,25 @@ def favicon():
     return app.send_static_file('favicon.ico')
 
 @app.errorhandler(ExperimentError)
+
 def handleExpError(e):
     """Handle errors by sending an error page."""
-    return e.error_page( request, config.get('HIT Configuration', 'contact_email_on_error') )
+    return e.error_page(request, config.get('HIT Configuration', 'contact_email_on_error'))
 
 @app.route('/static/js/psiturk.js')
 def psiturk_js():
     return render_template_string(psiturk_js_code)
 
-#----------------------------------------------
+# ----------------------------------------------
 # DB setup
-#----------------------------------------------
+# ----------------------------------------------
 @app.teardown_request
 def shutdown_session(exception=None):
     db_session.remove()
 
-#----------------------------------------------
+# ----------------------------------------------
 # Experiment counterbalancing code.
-#----------------------------------------------
+# ----------------------------------------------
 def get_random_condcount():
     """
     HITs can be in one of three states:
@@ -131,18 +133,18 @@ def get_random_condcount():
             counts[(cond, counter)] = 0
     for p in participants:
         counts[(p.cond, p.counterbalance)] += 1
-    mincount = min( counts.values() )
+    mincount = min(counts.values())
     minima = [hsh for hsh, count in counts.iteritems() if count == mincount]
     chosen = choice(minima)
     #conds += [ 0 for _ in range(1000) ]
     #conds += [ 1 for _ in range(1000) ]
-    app.logger.info( "given %(a)s chose %(b)s" % {'a': counts, 'b': chosen})
+    app.logger.info("given %(a)s chose %(b)s" % {'a': counts, 'b': chosen})
 
     return chosen
 
-#----------------------------------------------
+# ----------------------------------------------
 # routes
-#----------------------------------------------
+# ----------------------------------------------
 @app.route('/')
 @nocache
 def index():
@@ -168,7 +170,7 @@ def check_worker_status():
             status = part.status
         except:
             status = NOT_ACCEPTED
-        resp = {"status" : status}
+        resp = {"status": status}
         return jsonify(**resp)
 
 
@@ -192,7 +194,7 @@ def advertisement():
     browser_ok = True
     for rule in string.split(config.get('HIT Configuration', 'browser_exclude_rule'),','):
         myrule = rule.strip()
-        if myrule in ["mobile","tablet","touchcapable","pc","bot"]:
+        if myrule in ["mobile", "tablet", "touchcapable", "pc", "bot"]:
             if (myrule == "mobile" and user_agent_obj.is_mobile) or \
                (myrule == "tablet" and user_agent_obj.is_tablet) or \
                (myrule == "touchcapable" and user_agent_obj.is_touch_capable) or \
@@ -270,7 +272,7 @@ def give_consent():
     Serves up the consent in the popup window.
     """
     if not ('hitId' in request.args and 'assignmentId' in request.args and 'workerId' in request.args):
-        raise ExperimentError( 'hit_assign_worker_id_not_set_in_consent')
+        raise ExperimentError('hit_assign_worker_id_not_set_in_consent')
     hitId = request.args['hitId']
     assignmentId = request.args['assignmentId']
     workerId = request.args['workerId']
@@ -296,11 +298,11 @@ def start_exp():
     Serves up the experiment applet.
     """
     if not ('hitId' in request.args and 'assignmentId' in request.args and 'workerId' in request.args):
-        raise ExperimentError( 'hit_assign_worker_id_not_set_in_exp')
+        raise ExperimentError('hit_assign_worker_id_not_set_in_exp')
     hitId = request.args['hitId']
     assignmentId = request.args['assignmentId']
     workerId = request.args['workerId']
-    app.logger.info( "Accessing /exp: %(h)s %(a)s %(w)s " % {"h" : hitId, "a": assignmentId, "w": workerId})
+    app.logger.info("Accessing /exp: %(h)s %(a)s %(w)s " % {"h": hitId, "a": assignmentId, "w": workerId})
     if hitId[:5] == "debug":
         debug_mode = True
     else:
@@ -350,11 +352,11 @@ def start_exp():
                 nrecords += 1
         if nrecords <= 1 and not other_assignment:
             part = matches[0]
-            if part.status>=STARTED and not debug_mode: # in experiment (or later) can't restart at this point
+            if part.status >= STARTED and not debug_mode: # in experiment (or later) can't restart at this point
                 raise ExperimentError('already_started_exp')
         else:
             if nrecords > 1:
-                app.logger.error( "Error, hit/assignment appears in database more than once (serious problem)")
+                app.logger.error("Error, hit/assignment appears in database more than once (serious problem)")
                 raise ExperimentError('hit_assign_appears_in_database_more_than_once')
             if other_assignment:
                 raise ExperimentError('already_did_exp_hit')
@@ -380,7 +382,7 @@ def enterexp():
     experiment applet (meaning they can't do part of the experiment and
     referesh to start over).
     """
-    app.logger.info( "Accessing /inexp")
+    app.logger.info ("Accessing /inexp")
     if not 'uniqueId' in request.form:
         raise ExperimentError('improper_inputs')
     uniqueId = request.form['uniqueId']
@@ -395,7 +397,7 @@ def enterexp():
         db_session.commit()
         resp = {"status": "success"}
     except:
-        app.logger.error( "DB error: Unique user not found.")
+        app.logger.error("DB error: Unique user not found.")
         resp = {"status": "error, uniqueId not found"}
     return jsonify(**resp)
 
@@ -415,7 +417,7 @@ def update(uid=None):
                 filter(Participant.uniqueid == uid).\
                 one()
     except:
-        app.logger.error( "DB error: Unique user not found.")
+        app.logger.error("DB error: Unique user not found.")
 
     if hasattr(request, 'json'):
         user.datastring = request.data.decode('utf-8').encode('ascii', 'xmlcharrefreplace')
@@ -464,14 +466,13 @@ def quitter():
 @app.route('/complete', methods=['GET'])
 @nocache
 def debug_complete():
-    if not 'uniqueId' in request.args:
+    if 'uniqueId' not in request.args:
         raise ExperimentError('improper_inputs')
     else:
         uniqueId = request.args['uniqueId']
         try:
             user = Participant.query.\
-                        filter(Participant.uniqueid == uniqueId).\
-                        one()
+                filter(Participant.uniqueid == uniqueId).one()
             user.status = COMPLETED
             db_session.add(user)
             db_session.commit()
@@ -487,7 +488,7 @@ def worker_complete():
         return jsonify(**resp)
     else:
         uniqueId = request.args['uniqueId']
-        app.logger.info( "Completed experiment %s" % uniqueId)
+        app.logger.info("Completed experiment %s" % uniqueId)
         try:
             user = Participant.query.\
                         filter(Participant.uniqueid == uniqueId).\
@@ -499,7 +500,7 @@ def worker_complete():
             status = "success"
         except:
             status = "database error"
-        resp = {"status" : status}
+        resp = {"status": status}
         return jsonify(**resp)
 
 # Is this a security risk?
@@ -508,12 +509,12 @@ def ppid():
     ppid = os.getppid()
     return str(ppid)
 
-#----------------------------------------------
+# ----------------------------------------------
 # generic route
-#----------------------------------------------
+# ----------------------------------------------
 @app.route('/<pagename>')
 @app.route('/<foldername>/<pagename>')
-def regularpage(foldername=None,pagename=None):
+def regularpage(foldername=None, pagename=None):
     """
     Route not found by the other routes above. May point to a static template.
     """
@@ -522,7 +523,7 @@ def regularpage(foldername=None,pagename=None):
     if foldername is None and pagename is not None:
         return render_template(pagename)
     else:
-        return render_template(foldername+"/"+pagename)
+        return render_template(foldername + "/" + pagename)
 
 # # Initialize database if necessary
 def run_webserver():
