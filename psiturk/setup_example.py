@@ -19,7 +19,7 @@ def setup_example():
 		dir_util.copy_tree(example_dir, example_target)
 		# change to target director
 		print "Creating default configuration file (config.txt)"
-                file_util.copy_file(default_config_file , config_target)
+                file_util.copy_file(default_config_file, config_target)
 		os.chdir(example_target)
 		os.rename('custom.py.txt', 'custom.py')
 
@@ -28,5 +28,5 @@ def setup_example():
             file_util.copy_file(default_global_config_file, global_config_file)
 
 
-if __name__=="__main__":
+if __name__ == "__main__":
 	setup_example()
