@@ -1,6 +1,6 @@
 <img src="https://www.psiturk.org/static/images/psiturk_logo.jpg">
 
-[![Build Status](https://travis-ci.org/NYUCCL/psiTurk.png?branch=dev)](https://travis-ci.org/NYUCCL/psiTurk)
+[![Build Status](https://travis-ci.org/NYUCCL/psiTurk.svg?branch=Health)](https://travis-ci.org/NYUCCL/psiTurk)
 [![Coverage Status](http://coveralls.io/repos/NYUCCL/psiTurk/badge.png?branch=dev)](http://coveralls.io/r/NYUCCL/psiTurk?branch=dev)
 [![Code Health](https://landscape.io/github/NYUCCL/psiTurk/Health/landscape.png)](https://landscape.io/github/NYUCCL/psiTurk/Health)
 [![Downloads](https://pypip.in/d/PsiTurk/badge.png)](https://pypi.python.org/pypi/PsiTurk/)
