@@ -128,7 +128,7 @@ class RDSServices:
             default_sg = sgs[0]
             default_sg.authorize(ip_protocol='tcp', from_port=3306, to_port=3306, cidr_ip=str(ip_address)+'/32')
         except EC2ResponseError, e:
-            if e.error_code=="InvalidPermission.Duplicate":
+            if e.error_code == "InvalidPermission.Duplicate":
                 return True  # ok it already exists
             else:
                 return False
@@ -195,7 +195,7 @@ class RDSServices:
     def validate_instance_dbname(self, dbname):
         # 1-64 alphanumeric characters, cannot be a reserved MySQL word
         if re.match('[\w-]+$', dbname) is not None:
-            if len(dbname) <= 41 and len(dbname)>= 1:
+            if len(dbname) <= 41 and len(dbname) >= 1:
                 if dbname.lower() not in MYSQL_RESERVED_WORDS:
                     return True
         return '*** Error: Database names must be 1-64 alphanumeric characters, cannot be a reserved MySQL word.'
@@ -205,14 +205,14 @@ class RDSServices:
             return False
         try:
             db = self.rdsc.create_dbinstance(
-                    id = params['id'],
-                    allocated_storage = params['size'],
-                    instance_class = 'db.t1.micro',
-                    engine = 'MySQL',
-                    master_username = params['username'],
-                    master_password = params['password'],
-                    db_name = params['dbname'],
-                    multi_az = False
+                    id=params['id'],
+                    allocated_storage=params['size'],
+                    instance_class='db.t1.micro',
+                    engine='MySQL',
+                    master_username=params['username'],
+                    master_password=params['password'],
+                    db_name=params['dbname'],
+                    multi_az=False
                 )
         except:
             return False
@@ -298,7 +298,7 @@ class MTurkServices:
                       }) for hit in active_hits]
         return hits_data
 
-    def get_workers(self, assignmentStatus = None):
+    def get_workers(self, assignmentStatus=None):
         if not self.connect_to_turk():
             return False
         try:
@@ -394,8 +394,8 @@ class MTurkServices:
             host = 'mechanicalturk.amazonaws.com'
 
         mturkparams = dict(
-            aws_access_key_id = self.aws_access_key_id,
-            aws_secret_access_key = self.aws_secret_access_key,
+            aws_access_key_id=self.aws_access_key_id,
+            aws_secret_access_key=self.aws_secret_access_key,
             host=host)
         self.mtc = MTurkConnection(**mturkparams)
         return True
@@ -419,18 +419,18 @@ class MTurkServices:
 
         # Specify all the HIT parameters
         self.paramdict = dict(
-            hit_type = None,
-            question = mturkQuestion,
-            lifetime = hit_config['lifetime'],
-            max_assignments = hit_config['max_assignments'],
-            title = hit_config['title'],
-            description = hit_config['description'],
-            keywords = hit_config['keywords'],
-            reward = hit_config['reward'],
-            duration = hit_config['duration'],
-            approval_delay = None,
-            questions = None,
-            qualifications = quals
+            hit_type=None,
+            question=mturkQuestion,
+            lifetime=hit_config['lifetime'],
+            max_assignments=hit_config['max_assignments'],
+            title=hit_config['title'],
+            description=hit_config['description'],
+            keywords=hit_config['keywords'],
+            reward=hit_config['reward'],
+            duration=hit_config['duration'],
+            approval_delay=None,
+            questions=None,
+            qualifications=quals
         )
 
     def check_balance(self):
@@ -493,10 +493,10 @@ class MTurkServices:
         return hitdata[0].HITStatus
 
     def get_summary(self):
-      try:
-          balance = self.check_balance()
-          summary = jsonify(balance=str(balance))
-          return summary
-      except MTurkRequestError as e:
-          print e.error_message
-          return False
+        try:
+            balance = self.check_balance()
+            summary = jsonify(balance=str(balance))
+            return summary
+        except MTurkRequestError as e:
+            print e.error_message
+            return False
