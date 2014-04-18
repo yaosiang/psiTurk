@@ -392,7 +392,7 @@ class PsiturkShell(Cmd, object):
             cmds_super = []
             for name in names:
                 if name[:5] == 'help_':
-                    help[name[5:]]=1
+                    help[name[5:]] = 1
             names.sort()
             prevname = ''
             for name in names:
@@ -502,7 +502,7 @@ class PsiturkNetworkShell(PsiturkShell):
             print json.dumps(workers, indent=4,
                              separators=(',', ': '))
 
-    def worker_approve(self, chosenHit, assignment_ids = None):
+    def worker_approve(self, chosenHit, assignment_ids=None):
         if chosenHit:
             workers = self.amt_services.get_workers("Submitted")
             assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
@@ -514,7 +514,7 @@ class PsiturkNetworkShell(PsiturkShell):
             else:
                 print '*** failed to approve', assignmentID
 
-    def worker_reject(self, chosenHit, assignment_ids = None):
+    def worker_reject(self, chosenHit, assignment_ids=None):
         if chosenHit:
             workers = self.amt_services.get_workers("Submitted")
             assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
@@ -526,7 +526,7 @@ class PsiturkNetworkShell(PsiturkShell):
             else:
                 print '*** failed to reject', assignmentID
 
-    def worker_unreject(self, chosenHit, assignment_ids = None):
+    def worker_unreject(self, chosenHit, assignment_ids=None):
         if chosenHit:
             workers = self.amt_services.get_workers("Rejected")
             assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId']==chosenHit]
@@ -537,16 +537,16 @@ class PsiturkNetworkShell(PsiturkShell):
             else:
                 print '*** failed to unreject', assignmentID
 
-    def worker_bonus(self, chosenHit, auto, amount, reason, assignment_ids = None):
+    def worker_bonus(self, chosenHit, auto, amount, reason, assignment_ids=None):
         while not reason:
             r = raw_input("Type the reason for the bonus. Workers will see this message: ")
             reason = r
-        #bonus already-bonused workers if the user explicitly lists their worker IDs
+        # bonus already-bonused workers if the user explicitly lists their worker IDs
         overrideStatus = True
         if chosenHit:
             overrideStatus = False
             workers = self.amt_services.get_workers("Approved")
-            if not workers
+            if not workers:
                 print "No approved workers for HIT", chosenHit
                 return
             assignment_ids = [worker['assignmentId'] for worker in workers if worker['hitId'] == chosenHit]
@@ -624,7 +624,7 @@ class PsiturkNetworkShell(PsiturkShell):
     def hit_dispose(self, allHits, hitIDs=None):
         if allHits:
             hits_data = self.amt_services.get_all_hits()
-            hitIDs = [hit.options['hitid'] for hit in hits_data if (hit.options['status']=="Reviewable")]
+            hitIDs = [hit.options['hitid'] for hit in hits_data if (hit.options['status'] == "Reviewable")]
         for hit in hitIDs:
             # check that the his is reviewable
             status = self.amt_services.get_hit_status(hit)
@@ -636,7 +636,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 return
             else:
                 success = self.amt_services.dispose_hit(hit)
-                #self.web_services.delete_ad(hit)  # also delete the ad
+                # self.web_services.delete_ad(hit)  # also delete the ad
                 if success:
                     if self.sandbox:
                         print "deleting sandbox HIT", hit
@@ -786,7 +786,7 @@ class PsiturkNetworkShell(PsiturkShell):
         create_failed = False
         fail_msg = None
         ad_id = self.web_services.create_ad(ad_content)
-        if ad_id != False:
+        if ad_id:
             ad_url = self.web_services.get_ad_url(ad_id)
             hit_config = {
                 "ad_location": ad_url,
@@ -801,7 +801,7 @@ class PsiturkNetworkShell(PsiturkShell):
                 "duration": datetime.timedelta(hours=int(duration))
             }
             hit_id = self.amt_services.create_hit(hit_config)
-            if hit_id != False:
+            if hit_id:
                 if not self.web_services.set_ad_hitid(ad_id, hit_id):
                     create_failed = True
                     fail_msg = "  Unable to update Ad on http://ad.psiturk.org to point at HIT."
@@ -1070,11 +1070,11 @@ class PsiturkNetworkShell(PsiturkShell):
                     while not valid:
                         db_name = raw_input("No existing DBs in this instance.  Enter a new name to create one: ")
                         res = self.db_services.validate_instance_dbname(db_name)
-                        if res == True:
+                        if res:
                             valid = True
                         else:
                             print res + " Try again."
-                    create_db=True
+                    create_db = True
                 else:
                     print "Here are the available database tables"
                     for db in existing_dbs:
@@ -1083,7 +1083,7 @@ class PsiturkNetworkShell(PsiturkShell):
                     while not valid:
                         db_name = raw_input("Enter the name of the database you want to use or a new name to create a new one: ")
                         res = self.db_services.validate_instance_dbname(db_name)
-                        if res == True:
+                        if res:
                             valid = True
                         else:
                             print res + " Try again."
@@ -1375,7 +1375,7 @@ class PsiturkNetworkShell(PsiturkShell):
             cmds_super = []
             for name in names:
                 if name[:5] == 'help_':
-                    help[name[5:]]=1
+                    help[name[5:]] = 1
             names.sort()
             prevname = ''
             for name in names:
