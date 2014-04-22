@@ -107,6 +107,7 @@ class PsiturkShell(Cmd, object):
         self.helpPath = os.path.join(os.path.dirname(__file__), "shell_help/")
         self.psiTurk_header = 'psiTurk command help:'
         self.super_header = 'basic CMD command help:'
+        self.server.is_external = False
 
         self.color_prompt()
         self.intro = self.get_intro_prompt()
@@ -146,6 +147,8 @@ class PsiturkShell(Cmd, object):
             serverString = colorize('on', 'green')
         elif server_status == 'no':
             serverString = colorize('off', 'red')
+        elif self.server.is_external is True:
+            serverString = colorize('external', 'green')
         elif server_status == 'maybe':
             serverString = colorize('unknown', 'yellow')
         prompt += ' server:' + serverString
@@ -219,11 +222,16 @@ class PsiturkShell(Cmd, object):
 
         -p, --print-only         just provides the URL, doesn't attempt to launch browser
         """
-        if self.server.is_server_running() == 'no' or self.server.is_server_running()=='maybe':
+        if self.server.is_server_running() == 'no' or self.server.is_server_running()=='maybe' and self.server.is_external is not True:
             print "Error: Sorry, you need to have the server running to debug your experiment.  Try 'server on' first."
             return
 
-        base_url = "http://" + self.config.get('Server Parameters', 'host') + ":" + self.config.get('Server Parameters', 'port') + "/ad"
+        if self.server.is_external is True:
+            server_name = '[external address]'
+        else:
+            server_name = self.config.get('Server Parameters', 'host')
+
+        base_url = "http://" + server_name + ":" + self.config.get('Server Parameters', 'port') + "/ad"
         launchurl = base_url + "?assignmentId=debug" + str(self.random_id_generator()) \
                     + "&hitId=debug" + str(self.random_id_generator()) \
                     + "&workerId=debug" + str(self.random_id_generator())
@@ -268,6 +276,8 @@ class PsiturkShell(Cmd, object):
             print 'Server: ' + colorize('currently online', 'green')
         elif server_status == 'no':
             print 'Server: ' + colorize('currently offline', 'red')
+        elif self.server.is_external is True:
+            serverString = colorize('external', 'green')
         elif server_status == 'maybe':
             print 'Server: ' + colorize('status unknown', 'yellow')
 
@@ -455,6 +465,8 @@ class PsiturkNetworkShell(PsiturkShell):
             serverString = colorize('on', 'green')
         elif server_status == 'no':
             serverString = colorize('off', 'red')
+        elif self.server.is_external is True:
+            serverString = colorize('external', 'green')
         elif server_status == 'maybe':
             serverString = colorize('unknown', 'yellow')
         prompt += ' server:' + serverString
@@ -713,8 +725,10 @@ class PsiturkNetworkShell(PsiturkShell):
                              ''])
             r = raw_input('\n'.join(['  If you are using an external server process, press `y` to continue.',
                                       '  Otherwise, press `n` to cancel:']))
-            if r!='y':
+            if r != 'y':
                 return
+            else:
+                self.server.is_external = True
 
         interactive = False
         if numWorkers is None:
@@ -1259,7 +1273,7 @@ class PsiturkNetworkShell(PsiturkShell):
                mode <which>
         """
         restartServer = False
-        if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe':
+        if self.server.is_server_running() == 'yes' or self.server.is_server_running() == 'maybe' and self.server.is_external is not True:
             r = raw_input("Switching modes requires the server to restart. Really switch modes? y or n: ")
             if r != 'y':
                 return
