@@ -23,6 +23,8 @@ class PsiturkOrgServices:
         see: https://github.com/NYUCCL/api-psiturk-org
     """
     def __init__(self, key, secret):
+        config = PsiturkConfig()
+        config.load_config()
         self.apiServer = config.get('Dev Parameters', 'api_server')  # 'https://api.psiturk.org' # by default for now
         self.adServer = config.get('Dev Parameters', 'ad_server')
         self.sandboxAdServer = config.get('Dev Parameters', 'sandbox_ad_server')
