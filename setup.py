@@ -1,5 +1,5 @@
 from setuptools import setup
-rom psiturk.version import version_number
+from psiturk.version import version_number
 
 try:
     with open("README.md") as readmefile:
