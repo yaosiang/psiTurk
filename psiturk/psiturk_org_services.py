@@ -6,19 +6,20 @@ import requests
 from flask import jsonify
 from version import version_number
 import git
-
-# Load user config options
+import subprocess
+import signal
+import uuid
+import struct
+from sys import platform as _platform
 from psiturk_config import PsiturkConfig
-config = PsiturkConfig()
-config.load_config()
+import psutil
 
 
 class PsiturkOrgServices:
     """
-        PsiturkOrgServices
-        this class provides an interface to the API provided
-        by the psiturk_org website.  the two main features
-        of this API are registering secure ads
+        PsiturkOrgServices this class provides an interface to the API
+        provided by the psiturk_org website. The two main features of
+        this API are registering secure ads and providing tunnel access
         see: https://github.com/NYUCCL/api-psiturk-org
     """
     def __init__(self, key, secret):
@@ -62,16 +63,17 @@ class PsiturkOrgServices:
             response=urllib2.urlopen(api_server_status_link,timeout=1)
             status_msg = json.load(response)['status']
         except:
-            status_msg = "Sorry, can't connect to psiturk.org, please check your internet connection.\nYou will not be able to create new hits, but testing locally should work.\n"
+            status_msg = "Sorry, can't connect to psiturk.org, please check your \
+            internet connection.\nYou will not be able to create new hits, but \
+            testing locally should work.\n"
         return status_msg
 
     def get_my_ip(self):
         """
             get_my_ip:
-            asks and external server what your ip appears to be
-            (useful is running from behind a NAT/wifi router).
-            Of course, incoming port to the router must be
-            forwarded correctly.
+            asks and external server what your ip appears to be (useful
+            is running from behind a NAT/wifi router).  Of course,
+            incoming port to the router must be forwarded correctly.
         """
         if 'OPENSHIFT_SECRET_TOKEN' in os.environ:
             ip = os.environ['OPENSHIFT_APP_DNS']
@@ -86,7 +88,8 @@ class PsiturkOrgServices:
 
     def update_record(self, name, recordid, content, username, password):
         #headers = {'key': username, 'secret': password}
-        r = requests.put(self.apiServer + '/api/' + name + '/' + str(recordid), data=json.dumps(content), auth=(username,password))
+        r = requests.put(self.apiServer + '/api/' + name + '/' + str(recordid),
+                         data=json.dumps(content), auth=(username,password))
         return r
 
     def delete_record(self, name, recordid, username, password):
@@ -98,7 +101,6 @@ class PsiturkOrgServices:
         #headers = {'key': username, 'secret': password}
         r = requests.get(self.apiServer + '/api/' + name + "/" + query, auth=(username,password))
         return r
-
 
     def get_ad_url(self, adId, sandbox):
         """
@@ -198,3 +200,42 @@ class ExperimentExchangeServices:
             else:
                 print "Sorry, experiment not located on github.  You might contact the author of this experiment.  Experiment NOT downloaded."
             return
+
+
+class TunnelServices():
+    ''' Allow psiTurk to puncture firewalls using reverse tunnelling.'''
+
+    def __init__(self):
+        config = PsiturkConfig()
+        config.load_config()
+        self.check_os()
+        self.unique_id = str(uuid.uuid4())
+        self.local_port = config.getint('Server Parameters', 'port')
+        self.tunnel_port = 8000  # Set by tunnel server
+        self.tunnel_host = 'tunnel.psiturk.org'
+        self.tunnel_server = os.path.join(os.path.dirname(__file__), "tunnel/ngrok")
+        self.tunnel_config = os.path.join(os.path.dirname(__file__), "tunnel/ngrok-config")
+        self.is_open = False
+
+    def check_os(self):
+        is_64bit = struct.calcsize('P')*8 == 64
+
+        if _platform == "linux" or _platform == "linux2" or "win32" or not is_64bit:
+            Exception('Your OS is currently unsupported.')
+
+    def open(self):
+        cmd = '%s -subdomain=%s -config=%s -log=stdout %s 2>&1 > server.log' \
+                  %(self.tunnel_server, self.unique_id, self.tunnel_config,
+                    self.local_port)
+        self.tunnel = subprocess.Popen(cmd, shell=True)
+        self.url = '%s.%s' %(self.unique_id, self.tunnel_host)
+        self.full_url = 'http://%s.%s:%s' %(self.unique_id, self.tunnel_host,
+                                            self.tunnel_port)
+        self.is_open = True
+
+    def close(self):
+        p = psutil.Process(self.tunnel.pid)
+        child_pid = p.get_children(recursive=True)
+        for pid in child_pid:
+            pid.send_signal(signal.SIGTERM)
+        self.is_open = False
