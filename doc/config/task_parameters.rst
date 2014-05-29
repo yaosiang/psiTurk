@@ -10,6 +10,8 @@ your task.  An example looks like this:
 	experiment_code_version = 1.0
 	num_conds = 1
 	num_counters = 1
+	allow_repeats = false
+	always_show_instructions = true
 
 `experiment_code_version`  [ string ]
 -----------------------------------
@@ -42,3 +44,23 @@ behaves as if there are `num_cond*num_counters` conditions
 and assigns subjects randomly to the the expanded design.
 See `Issue #53 <https://github.com/NYUCCL/psiTurk/issues/53>`__
 for more info.
+
+`allow_repeats` [ true | false]
+-----------------------------------------
+
+If set to `true`, psiturk will not block a worker who has
+already done the task (as assessed in the current database table).
+This is to enable HITs where a worker might do a optional 
+length sequence of smaller tasks rather than one long experiment.
+
+`always_show_instructions` [ true | false]
+-----------------------------------------
+
+If set to `true`, psiturk will also present a worker with 
+instructions, even if they have already completed the task.
+If set to false, if the worker has already done the task or
+HIT once (as assess in the current database table), then the
+instructions will not be displayed again.  **Important** this
+has to actually be implemented by the experimenter.  This just
+provides a flag where you can check if you should show the
+instructions again in your javascript code.

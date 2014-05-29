@@ -103,6 +103,8 @@ project:
 	experiment_code_version = 1.0
 	num_conds = 1
 	num_counters = 1
+	allow_repeats = false
+	always_show_instructions = true
 
 	[Shell Parameters]
 	launch_in_sandbox_mode = true
