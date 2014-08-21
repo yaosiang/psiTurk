@@ -18,7 +18,7 @@ except ImportError:
     from counter import Counter
 
 # Setup flask
-from flask import Flask, render_template, render_template_string, request, \
+from flask import Flask, abort, render_template, render_template_string, request, \
     jsonify
 
 # Setup database
