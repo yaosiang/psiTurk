@@ -29,4 +29,7 @@ Base.query = db_session.query_property()
 
 def init_db():
     #print "Initalizing db if necessary."
-    Base.metadata.create_all(bind=engine)
+    try:
+	    Base.metadata.create_all(bind=engine)
+	except:
+		print "DB error: Error opening database connection"

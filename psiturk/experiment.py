@@ -485,6 +485,7 @@ def load(uid=None):
             one()
     except exc.SQLAlchemyError:
         app.logger.error("DB error: Unique user not found.")
+        abort(404)
 
     try:
         resp = json.loads(user.datastring)
@@ -512,23 +513,22 @@ def update(uid=None):
         user = Participant.query.\
             filter(Participant.uniqueid == uid).\
             one()
-    except exc.SQLAlchemyError:
-        app.logger.error("DB error: Unique user not found.")
-
-    if hasattr(request, 'json'):
-        user.datastring = request.data.decode('utf-8').encode(
-            'ascii', 'xmlcharrefreplace'
-        )
-        db_session.add(user)
-        db_session.commit()
-
-    try:
+        if hasattr(request, 'json'):
+            user.datastring = request.data.decode('utf-8').encode(
+                'ascii', 'xmlcharrefreplace'
+            )
+            db_session.add(user)
+            db_session.commit()
         data = json.loads(user.datastring)
+    except exc.SQLAlchemyError:
+        app.logger.error("DB error: Unique user not found.  Data not saved.")
+        abort(404)
     except:
         data = {}
 
     trial = data.get("currenttrial", None)
     app.logger.info("saved data for %s (current trial: %s)", uid, trial)
+
     resp = {"status": "user data saved"}
     return jsonify(**resp)
 
