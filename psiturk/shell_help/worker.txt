@@ -1,14 +1,14 @@
 Usage:
-  worker approve (--hit <hit_id> | <assignment_id> ...)
-  worker reject (--hit <hit_id> | <assignment_id> ...)
-  worker unreject (--hit <hit_id> | <assignment_id> ...)
-  worker bonus  (--amount <amount> | --auto) (--hit <hit_id> | <assignment_id> ...)
+  worker approve [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+  worker reject [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+  worker unreject [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+  worker bonus  [--nomessage] (--amount <amount> | --auto) (--hit <hit_id> | <assignment_id> ...)
   worker list [--submitted | --approved | --rejected] [--hit <hit_id>]
   worker help
 
 'worker' is used with the following subcommands:
   approve   Approve worker assignments for one or more assignment ID's, or
-  	    use the '--hit' flag to approve all workers for a specific HIT.
+      	    use the '--hit' flag to approve all workers for a specific HIT.
   reject    Reject worker assignments for one or more assignment ID's, or use
             the '--hit' flag to reject all workers for a specific HIT.
   unreject  Unreject worker assignments for one or more assignment ID's, or use

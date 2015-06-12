@@ -672,51 +672,69 @@ class PsiturkNetworkShell(PsiturkShell):
             print json.dumps(workers, indent=4,
                              separators=(',', ': '))
 
-    def worker_approve(self, chosen_hit, assignment_ids=None):
+    def worker_approve(self, chosen_hit, assignment_ids=None, nomessage=False):
         ''' Approve worker '''
+        if not nomessage:
+            user_input = raw_input("Type feedback for the assignment. Workers "
+                                   "will see this message: ")
+            reason = user_input
+        else:
+            reason = None
         if chosen_hit:
             workers = self.amt_services.get_workers("Submitted")
             assignment_ids = [worker['assignmentId'] for worker in workers if \
                               worker['hitId'] == chosen_hit]
             print 'approving workers for HIT', chosen_hit
         for assignment_id in assignment_ids:
-            success = self.amt_services.approve_worker(assignment_id)
+            success = self.amt_services.approve_worker(assignment_id, reason)
             if success:
                 print 'approved', assignment_id
             else:
                 print '*** failed to approve', assignment_id
 
-    def worker_reject(self, chosen_hit, assignment_ids = None):
+    def worker_reject(self, chosen_hit, assignment_ids = None, nomessage=False):
         ''' Reject worker '''
+        if not nomessage:
+            user_input = raw_input("Type feedback for the assignment. Workers "
+                                   "will see this message: ")
+            reason = user_input
+        else:
+            reason = None
         if chosen_hit:
             workers = self.amt_services.get_workers("Submitted")
             assignment_ids = [worker['assignmentId'] for worker in workers if \
                               worker['hitId'] == chosen_hit]
             print 'rejecting workers for HIT', chosen_hit
         for assignment_id in assignment_ids:
-            success = self.amt_services.reject_worker(assignment_id)
+            success = self.amt_services.reject_worker(assignment_id, reason)
             if success:
                 print 'rejected', assignment_id
             else:
                 print '*** failed to reject', assignment_id
 
-    def worker_unreject(self, chosen_hit, assignment_ids = None):
+    def worker_unreject(self, chosen_hit, assignment_ids = None, nomessage=False):
         ''' Unreject worker '''
+        if not nomessage:
+            user_input = raw_input("Type feedback for the assignment. Workers "
+                                   "will see this message: ")
+            reason = user_input
+        else:
+            reason = None
         if chosen_hit:
             workers = self.amt_services.get_workers("Rejected")
             assignment_ids = [worker['assignmentId'] for worker in workers if \
                               worker['hitId'] == chosen_hit]
         for assignment_id in assignment_ids:
-            success = self.amt_services.unreject_worker(assignment_id)
+            success = self.amt_services.unreject_worker(assignment_id, reason)
             if success:
                 print 'unrejected %s' % (assignment_id)
             else:
                 print '*** failed to unreject', assignment_id
 
-    def worker_bonus(self, chosen_hit, auto, amount, reason,
-                     assignment_ids=None):
+    def worker_bonus(self, chosen_hit, auto, amount, reason=None,
+                     assignment_ids=None, nomessage=False):
         ''' Bonus worker '''
-        while not reason:
+        if not reason and not nomessage:
             user_input = raw_input("Type the reason for the bonus. Workers "
                                    "will see this message: ")
             reason = user_input
@@ -1640,25 +1658,25 @@ class PsiturkNetworkShell(PsiturkShell):
     def do_worker(self, arg):
         """
         Usage:
-          worker approve (--hit <hit_id> | <assignment_id> ...)
-          worker reject (--hit <hit_id> | <assignment_id> ...)
-          worker unreject (--hit <hit_id> | <assignment_id> ...)
-          worker bonus  (--amount <amount> | --auto) (--hit <hit_id> | <assignment_id> ...)
+          worker approve [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+          worker reject [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+          worker unreject [--nomessage] (--hit <hit_id> | <assignment_id> ...)
+          worker bonus  [--nomessage] (--amount <amount> | --auto) (--hit <hit_id> | <assignment_id> ...)
           worker list [--submitted | --approved | --rejected] [(--hit <hit_id>)]
           worker help
         """
         if arg['approve']:
-            self.worker_approve(arg['<hit_id>'], arg['<assignment_id>'])
+            self.worker_approve(arg['<hit_id>'], arg['<assignment_id>'], arg['--nomessage'])
         elif arg['reject']:
-            self.worker_reject(arg['<hit_id>'], arg['<assignment_id>'])
+            self.worker_reject(arg['<hit_id>'], arg['<assignment_id>'], arg['--nomessage'])
         elif arg['unreject']:
-            self.worker_unreject(arg['<hit_id>'], arg['<assignment_id>'])
+            self.worker_unreject(arg['<hit_id>'], arg['<assignment_id>'], arg['--nomessage'])
         elif arg['list']:
             self.worker_list(arg['--submitted'], arg['--approved'],
                              arg['--rejected'], arg['<hit_id>'])
         elif arg['bonus']:
             self.worker_bonus(arg['<hit_id>'], arg['--auto'], arg['<amount>'],
-                              "", arg['<assignment_id>'])
+                              "", arg['<assignment_id>'], arg['--nomessage'])
         else:
             self.help_worker()
 

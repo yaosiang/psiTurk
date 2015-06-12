@@ -428,32 +428,32 @@ class MTurkServices(object):
             print exception
             return False
 
-    def approve_worker(self, assignment_id):
+    def approve_worker(self, assignment_id, feedback=None):
         ''' Approve worker '''
         if not self.connect_to_turk():
             return False
         try:
-            self.mtc.approve_assignment(assignment_id, feedback=None)
+            self.mtc.approve_assignment(assignment_id, feedback=feedback)
             return True
         except MTurkRequestError:
             return False
 
-    def reject_worker(self, assignment_id):
+    def reject_worker(self, assignment_id, feedback=None):
         ''' Reject worker '''
         if not self.connect_to_turk():
             return False
         try:
-            self.mtc.reject_assignment(assignment_id, feedback=None)
+            self.mtc.reject_assignment(assignment_id, feedback=feedback)
             return True
         except MTurkRequestError:
             return False
 
-    def unreject_worker(self, assignment_id):
+    def unreject_worker(self, assignment_id, feedback=None):
         ''' Unreject worker '''
         if not self.connect_to_turk():
             return False
         try:
-            self.mtc.approve_rejected_assignment(assignment_id)
+            self.mtc.approve_rejected_assignment(assignment_id, feedback=feedback)
             return True
         except MTurkRequestError:
             return False
