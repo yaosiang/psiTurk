@@ -29,7 +29,7 @@ from amt_services import MTurkServices, RDSServices
 from psiturk_org_services import PsiturkOrgServices, TunnelServices
 from psiturk_config import PsiturkConfig
 from db import db_session, init_db
-from models import Participant
+from models import Participant, LocalHit
 from utils import *
 
 class MTurkServicesWrapper():
@@ -287,7 +287,9 @@ class MTurkServicesWrapper():
     
     def _get_my_hitids(self):
         init_db()
-        my_hitids = [part.hitid for part in Participant.query.distinct(Participant.hitid)]
+        part_hitids = [part.hitid for part in Participant.query.distinct(Participant.hitid)]
+        local_hitids = [localhit.hitid for localhit in LocalHit.query.distinct(LocalHit.hitid)]
+        my_hitids = list(set(part_hitids + local_hitids))
         return my_hitids
         
     def _get_hits(self, all_studies=False):
@@ -295,8 +297,8 @@ class MTurkServicesWrapper():
         if not amt_hits:
             return []
         # get list of unique hitids from database
-        if False: # this is broken right now because it only will find a hit which has one person logged to it in the db
-        #if not all_studies:
+        #if False: # this is broken right now because it only will find a hit which has one person logged to it in the db
+        if not all_studies:
             my_hitids = self._get_my_hitids()
             amt_hits = [hit for hit in amt_hits if hit.options['hitid'] in my_hitids]
         return amt_hits
