@@ -1,7 +1,8 @@
 
 import datetime
 import io, csv, json
-from sqlalchemy import Column, Integer, String, DateTime, Float, Text
+from sqlalchemy import Column, Integer, String, DateTime, Float, Text, Boolean, Interval
+from sqlalchemy.sql import func
 
 from db import Base
 from psiturk_config import PsiturkConfig
@@ -9,14 +10,14 @@ from psiturk_config import PsiturkConfig
 config = PsiturkConfig()
 config.load_config()
 
-TABLENAME = config.get('Database Parameters', 'table_name')
+#TABLENAME = config.get('Database Parameters', 'table_name')
 CODE_VERSION = config.get('Task Parameters', 'experiment_code_version')
 
 class Participant(Base):
     """
     Object representation of a participant in the database.
     """
-    __tablename__ = TABLENAME
+    __tablename__ = 'participant'
 
     uniqueid =Column(String(128), primary_key=True)
     assignmentid =Column(String(128), nullable=False)
@@ -119,3 +120,32 @@ class Participant(Base):
             print("Error reading record:", self)
             return("")
 
+class LocalHit(Base):
+    """
+    Object representation of a hit created for this study
+    """
+    __tablename__ = 'hit'
+    
+    hitid = Column(String(128), primary_key=True, unique=True)
+    time_created = Column(DateTime(timezone=True), server_default=func.now())
+    ad_location = Column(String(128))
+    approve_requirement = Column(Integer)
+    us_only = Column(Boolean)
+    lifetime = Column(Interval)
+    max_assignments = Column(Integer)
+    title = Column(String(256))
+    description = Column(Text)
+    keywords = Column(String(256))
+    reward = Column(Float)
+    duration = Column(Interval)
+    number_hits_approved = Column(Integer)
+    require_master_workers = Column(Boolean)
+        
+    
+    
+    
+    
+    
+    
+    
+    

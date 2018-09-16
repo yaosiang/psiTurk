@@ -13,7 +13,10 @@ from boto.mturk.qualification import LocaleRequirement, \
 from flask import jsonify
 import re as re
 from psiturk.psiturk_config import PsiturkConfig
+from psiturk.models import LocalHit
+from db import db_session, init_db
 
+init_db()
 
 MYSQL_RESERVED_WORDS_CAP = [
     'ACCESSIBLE', 'ADD', 'ALL', 'ALTER', 'ANALYZE', 'AND', 'AS', 'ASC',
@@ -592,12 +595,18 @@ class MTurkServices(object):
                 return False
             self.configure_hit(hit_config)
             myhit = self.mtc.create_hit(**self.param_dict)[0]
-            self.hitid = myhit.HITId
+            hitid = myhit.HITId
         except MTurkRequestError as e:
+            print "Failed to create the HIT"
             print e
             return False
-        else:
-            return self.hitid
+        
+        hit = LocalHit(**hit_config)
+        hit.hitid = hitid
+        db_session.add(hit)
+        db_session.commit()
+        
+        return hitid    
 
     # TODO(Jay): Have a wrapper around functions that serializes them.
     # Default output should not be serialized.
