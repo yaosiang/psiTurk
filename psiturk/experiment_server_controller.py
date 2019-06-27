@@ -1,7 +1,10 @@
 from __future__ import print_function
-import urllib.parse
-import urllib.error
-import urllib.request
+try:
+    from urllib.error import HTTPError
+    from urllib.request import urlopen, Request
+except ImportError:
+    from urllib2 import HTTPError, urlopen, Request
+
 import hashlib
 import time
 import psutil
@@ -117,8 +120,8 @@ class ExperimentServerController(object):
         if not self.is_port_available():
             url = "http://{hostname}:{port}/ppid".format(hostname=self.config.get(
                 "Server Parameters", "host"), port=self.config.getint("Server Parameters", "port"))
-            ppid_request = urllib.request.Request(url)
-            ppid = urllib.request.urlopen(ppid_request).read()
+            ppid_request = Request(url)
+            ppid = urlopen(ppid_request).read()
             return ppid
         else:
             raise ExperimentServerControllerException(
