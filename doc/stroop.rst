@@ -148,7 +148,7 @@ The psiTurk shell prompt displays several useful pieces of information: whether 
 
 .. seealso::
 
-	More documention of the shell including documentation of each available command
+	More documentation of the shell including documentation of each available command
 	is available `here <command_line_overview.html>`__.
 
 
@@ -188,7 +188,7 @@ will look something like this::
 The ``http://localhost:22362/`` part is set in the configuration options under
 ``Server Parameters`` in the fields "host" and "port". The default value,
 ``http://localhost:22362/`` is a special term that refers to your own computer.
-As mentioned above, if you wanted to run this experiment publically you would want
+As mentioned above, if you wanted to run this experiment publicly you would want
 to change the host option to ``0.0.0.0``.
 
 The remaining part of the URL created random (i.e., fake) identifiers which stand-in
@@ -245,7 +245,7 @@ Then the main experiment begins which dynamically re-draws
 the browser window using Javascript.  The `psiturk.js API <api.html>`__
 records the data and synchronizes it with your server from time to time.
 
-After the experiment finishes the user is given a simple questionaire about
+After the experiment finishes the user is given a simple questionnaire about
 their experiences in the task.  Finally control is returned to Amazon
 (or if debugging a stand-in message is displayed).
 
@@ -307,7 +307,7 @@ accepting the HIT before it will be returned.  Finally the unique
 "ad" for this experiment/HIT is displayed at the bottom.  Notice that the
 ad is hosted on ``https://ad.psiturk.org`` which means it will always
 be visible to virtually all participants (see more info about the
-`Secure Ad Server <sercure_ad_server.html>`__).
+`Secure Ad Server <secure_ad_server.html>`__).
 
 You can also run create_hit non-interactively by providing arguments when
 you run the command, for example ``create_hit 10 1.00 4``.
@@ -389,7 +389,7 @@ The ``amt_balance`` command will let you check your current balance::
 .. danger::
 
 	Remember to switch back to "sandbox" mode when you are finished
-	collecting data so that the command you type will not accidently
+	collecting data so that the command you type will not accidentally
 	create tasks that will charge you account money!
 
 Further learning...

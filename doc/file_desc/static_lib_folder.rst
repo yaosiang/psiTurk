@@ -13,5 +13,5 @@ includes libraries for
 `Backbone <http://backbonejs.org/>`__, `JQuery <http://jquery.com/>`__, `d3.js <http://d3js.org/>`__, and
 `underscore.js <http://underscorejs.org/>`__.
 These four are required for **psiTurk** to work
-properly but you can add other lirbaries for customization
+properly but you can add other libraries for customization
 purposes.

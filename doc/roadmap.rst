@@ -70,7 +70,7 @@ The Ad Server has the potential to gather valuable
 data about participants in studies, how naive they
 are, etc...  Currently only a limited number of
 statistics are gathered, and much of this data is
-not publically accessible via an API or interface.
+not publicly accessible via an API or interface.
 Future versions of the psiturk.org dashboard could
 provide users with more interesting statistics
 about participants in their experiments, their geographic
@@ -88,7 +88,7 @@ is that for many users the ability to serve
 experiments off their local computer obviates the
 need for a dedicated server and simplifies some
 web security issues.  For other users thought this
-is a fustrating hurdle to overcome in order to
+is a frustrating hurdle to overcome in order to
 use psiturk.  We are interesting in the community's
 thoughts about this and suggestions about best
 practices include cloud based hosting systems like

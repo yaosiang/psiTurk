@@ -80,7 +80,7 @@ library.
 
 If debug is true, if there is an internal server error
 helpful debugging information will be printed into the webpage of
-people taking the experiment.  **IMPORANT** this should be
+people taking the experiment.  **IMPORTANT** this should be
 set to false for live experiments to prevent possible security
 holes.
 
@@ -110,7 +110,7 @@ using them, this is ignored.
 
 `threads` controls the number of process threads
 the the psiturk webserver will run.  This enables multiple
-simultanous connections from internet users.  If you select
+simultaneous connections from internet users.  If you select
 `auto` it will set this based on the number of processor
 cores on your current computer.
 
